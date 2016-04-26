@@ -12,7 +12,6 @@
         "express": "",
         "hbs": "",
         "morgan": "",
-        "serve-favicon": "",
         "stylus": "",
         "request": ""
     }
