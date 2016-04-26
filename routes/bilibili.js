@@ -1,10 +1,10 @@
 var express = require('express'),
-    router = express.Router(),
     request = require('request'),
+    router = express.Router(),
     mid = 2367398,
-    getList = function (req, res, url, callback, key, page, list) {
-        if (key === undefined) {
-            key = ['count', 'result'];
+    getList = function (req, res, url, deal, keys, page, list) {
+        if (keys === undefined) {
+            keys = ['count', 'result'];
         }
         if (page === undefined) {
             page = 1;
@@ -20,11 +20,11 @@ var express = require('express'),
             },
             json: true
         }, function (e, r, body) {
-            if (body.status) {
-                list = list.concat(body.data[key[1]]);
+            if (body.data[keys[1]] !== undefined) {
+                list = list.concat(body.data[keys[1]]);
             }
-            if (body.data[key[0]] > list.length) {
-                getList(req, res, url, callback, key, page + 1, list);
+            if (body.data[keys[0]] > list.length) {
+                getList(req, res, url, deal, keys, page + 1, list);
             }
             else {
                 request.get({
@@ -34,50 +34,90 @@ var express = require('express'),
                     },
                     json: true
                 }, function (e, r, body) {
-                    callback(body.data.name, list);
+                    var result = deal(body.data.name, list);
+                    if (req.query.type === 'json') {
+                        if (req.query.download === 'true') {
+                            res.setHeader('Content-Type', 'text/json; charset=utf-8');
+                            if (req.get('User-Agent').toLowerCase().indexOf('firefox') === -1) {
+                                res.setHeader('Content-Disposition', 'attachment; filename=' + encodeURIComponent(result.title + '_' + new Date().getTime() + '.json'));
+                            } else {
+                                res.setHeader('Content-Disposition', 'attachment; filename*="utf-8\'\'' + encodeURIComponent(result.title + '_' + new Date().getTime() + '.json') + '"');
+                            }
+                        }
+                        res.send({
+                            path: req.path,
+                            list: list
+                        });
+                    } else {
+                        res.render('bilibili_list', result);
+                    }
                 });
             }
         });
     };
 
-router.get('/bangumiList', function (req, res) {
-    getList(req, res, 'http://space.bilibili.com/ajax/Bangumi/getList', function (name, list) {
-        res.render('bilibili_list', {
-            title: '哔哩哔哩订阅列表-' + name,
-            list: list
-        });
+router.get('/*List', function (req, res) {
+    var url, deal, keys;
+    switch (req.path) {
+    case '/bangumiList':
+        url = 'http://space.bilibili.com/ajax/Bangumi/getList';
+        deal = function (name, list) {
+            return {
+                title: '哔哩哔哩订阅列表-' + name,
+                list: list
+            };
+        };
+        break;
+    case '/followList':
+        url = 'http://space.bilibili.com/ajax/friend/GetAttentionList';
+        deal = function (name, list) {
+            return {
+                title: '哔哩哔哩关注列表-' + name,
+                list: list.map(function (item) {
+                    return {title: item.uname};
+                })
+            };
+        };
+        keys = ['results', 'list'];
+        break;
+    case '/fansList':
+        url = 'http://space.bilibili.com/ajax/friend/GetFansList';
+        deal = function (name, list) {
+            return {
+                title: '哔哩哔哩粉丝列表-' + name,
+                list: list.map(function (item) {
+                    return {title: item.uname};
+                })
+            };
+        };
+        keys = ['results', 'list'];
+        break;
+    case '/videoList':
+        url = 'http://space.bilibili.com/ajax/member/getSubmitVideos';
+        deal = function (name, list) {
+            return {
+                title: '哔哩哔哩视频列表-' + name,
+                list: list
+            };
+        };
+        keys = ['count', 'vlist'];
+        break;
+    default:
+        var err = new Error();
+        err.status = 404;
+        throw err;
+    }
+    getList(req, res, url, deal, keys);
+});
+
+router.post('/*List', function (req, res) {
+    request.get({
+        url: req.get('Referer'),
+        qs: {type: 'json'},
+        json: true
+    }, function (e, r, body) {
+        res.send(body);
     });
-});
-
-router.get('/followList', function (req, res) {
-    getList(req, res, 'http://space.bilibili.com/ajax/friend/GetAttentionList', function (name, list) {
-        res.render('bilibili_list', {
-            title: '哔哩哔哩关注列表-' + name,
-            list: list.map(function (item) {
-                return {title: item.uname};
-            })
-        });
-    }, ['results', 'list']);
-});
-
-router.get('/fansList', function (req, res) {
-    getList(req, res, 'http://space.bilibili.com/ajax/friend/GetFansList', function (name, list) {
-        res.render('bilibili_list', {
-            title: '哔哩哔哩粉丝列表-' + name,
-            list: list.map(function (item) {
-                return {title: item.uname};
-            })
-        });
-    }, ['results', 'list']);
-});
-
-router.get('/videoList', function (req, res) {
-    getList(req, res, 'http://space.bilibili.com/ajax/member/getSubmitVideos', function (name, list) {
-        res.render('bilibili_list', {
-            title: '哔哩哔哩视频列表-' + name,
-            list: list
-        });
-    }, ['count', 'vlist']);
 });
 
 module.exports = router;

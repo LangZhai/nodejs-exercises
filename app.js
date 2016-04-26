@@ -20,14 +20,19 @@ app.use('/bilibili', bilibili);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-    var err = new Error('Not Found');
+    var err = new Error();
     err.status = 404;
     next(err);
 });
 
 // error handlers
 app.use(function (err, req, res, next) {
-    res.status(err.status || 500);
+    if (err.status === undefined) {
+        err.status = 500;
+    } else if (err.status === 404) {
+        err.message = 'Not Found';
+    }
+    res.status(err.status);
     res.render('error', {
         title: err.message,
         message: err.message,
