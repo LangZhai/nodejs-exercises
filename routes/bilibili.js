@@ -1,5 +1,6 @@
 var express = require('express'),
     request = require('request'),
+    multiparty = require('multiparty'),
     router = express.Router(),
     mid = 2367398,
     getList = function (req, res, url, deal, keys, page, list) {
@@ -34,90 +35,138 @@ var express = require('express'),
                     },
                     json: true
                 }, function (e, r, body) {
-                    var result = deal(body.data.name, list);
+                    var data = deal(body.data.name, list);
+                    data.mid = req.query.mid === undefined ? mid : req.query.mid;
                     if (req.query.type === 'json') {
                         if (req.query.download === 'true') {
                             res.setHeader('Content-Type', 'text/json; charset=utf-8');
                             if (req.get('User-Agent').toLowerCase().indexOf('firefox') === -1) {
-                                res.setHeader('Content-Disposition', 'attachment; filename=' + encodeURIComponent(result.title + '_' + new Date().getTime() + '.json'));
+                                res.setHeader('Content-Disposition', 'attachment; filename=' + encodeURIComponent(data.title + '_' + new Date().getTime() + '.json'));
                             } else {
-                                res.setHeader('Content-Disposition', 'attachment; filename*="utf-8\'\'' + encodeURIComponent(result.title + '_' + new Date().getTime() + '.json') + '"');
+                                res.setHeader('Content-Disposition', 'attachment; filename*="utf-8\'\'' + encodeURIComponent(data.title + '_' + new Date().getTime() + '.json') + '"');
                             }
                         }
-                        res.send({
+                        res.json({
                             path: req.path,
-                            list: list
+                            list: data.list
                         });
                     } else {
-                        res.render('bilibili_list', result);
+                        res.render('bilibili/list', data);
                     }
                 });
             }
         });
     };
 
-router.get('/*List', function (req, res) {
-    var url, deal, keys;
-    switch (req.path) {
-    case '/bangumiList':
-        url = 'http://space.bilibili.com/ajax/Bangumi/getList';
-        deal = function (name, list) {
-            return {
-                title: '哔哩哔哩订阅列表-' + name,
-                list: list
-            };
+router.get('/bangumiList', function (req, res) {
+    getList(req, res, 'http://space.bilibili.com/ajax/Bangumi/getList', function (name, list) {
+        return {
+            title: '哔哩哔哩订阅列表-' + name,
+            list: list
         };
-        break;
-    case '/followList':
-        url = 'http://space.bilibili.com/ajax/friend/GetAttentionList';
-        deal = function (name, list) {
-            return {
-                title: '哔哩哔哩关注列表-' + name,
-                list: list.map(function (item) {
-                    return {title: item.uname};
-                })
-            };
+    });
+});
+
+router.get('/followList', function (req, res) {
+    getList(req, res, 'http://space.bilibili.com/ajax/friend/GetAttentionList', function (name, list) {
+        return {
+            title: '哔哩哔哩关注列表-' + name,
+            list: list.map(function (item) {
+                var obj = JSON.parse(JSON.stringify(item));
+                obj.title = obj.uname;
+                return obj;
+            })
         };
-        keys = ['results', 'list'];
-        break;
-    case '/fansList':
-        url = 'http://space.bilibili.com/ajax/friend/GetFansList';
-        deal = function (name, list) {
-            return {
-                title: '哔哩哔哩粉丝列表-' + name,
-                list: list.map(function (item) {
-                    return {title: item.uname};
-                })
-            };
+    }, ['results', 'list']);
+});
+
+router.get('/fansList', function (req, res) {
+    getList(req, res, 'http://space.bilibili.com/ajax/friend/GetFansList', function (name, list) {
+        return {
+            title: '哔哩哔哩粉丝列表-' + name,
+            list: list.map(function (item) {
+                var obj = JSON.parse(JSON.stringify(item));
+                obj.title = obj.uname;
+                return obj;
+            })
         };
-        keys = ['results', 'list'];
-        break;
-    case '/videoList':
-        url = 'http://space.bilibili.com/ajax/member/getSubmitVideos';
-        deal = function (name, list) {
-            return {
-                title: '哔哩哔哩视频列表-' + name,
-                list: list
-            };
+    }, ['results', 'list']);
+});
+
+router.get('/videoList', function (req, res) {
+    getList(req, res, 'http://space.bilibili.com/ajax/member/getSubmitVideos', function (name, list) {
+        return {
+            title: '哔哩哔哩视频列表-' + name,
+            list: list
         };
-        keys = ['count', 'vlist'];
-        break;
-    default:
-        var err = new Error();
-        err.status = 404;
-        throw err;
-    }
-    getList(req, res, url, deal, keys);
+    }, ['count', 'vlist']);
 });
 
 router.post('/*List', function (req, res) {
-    request.get({
-        url: req.get('Referer'),
-        qs: {type: 'json'},
-        json: true
-    }, function (e, r, body) {
-        res.send(body);
+    var key,
+        data = {},
+        formData = {file: []},
+        form = new multiparty.Form();
+    switch (req.path) {
+    case '/bangumiList':
+        key = 'season_id';
+        break;
+    case '/followList':
+    case '/fansList':
+        key = 'fid';
+        break;
+    case '/videoList':
+        key = 'aid';
+        break;
+    default:
+        key = 'id';
+    }
+    form.on('field', function (key, val) {
+        formData[key] = val;
     });
+    form.on('part', function (part) {
+        if (part.name !== 'file') {
+            return part.resume();
+        }
+        data.file = part.filename;
+        part.on('data', function (buf) {
+            formData.file.push(new Buffer(buf).toString());
+        });
+    });
+    form.on('close', function () {
+        data.title = formData.title + '-比较';
+        if (formData.file.length) {
+            formData.file = JSON.parse(formData.file.join(''));
+            request.get({
+                url: req.get('Referer'),
+                qs: {type: 'json'},
+                json: true
+            }, function (e, r, body) {
+                if (body.path === formData.file.path) {
+                    data.add = body.list.filter(function (itemA) {
+                        return formData.file.list.every(function (itemB) {
+                            return itemA[key] !== itemB[key];
+                        });
+                    });
+                    data.remove = formData.file.list.filter(function (itemA) {
+                        return body.list.every(function (itemB) {
+                            return itemA[key] !== itemB[key];
+                        });
+                    });
+                    if (data.add.length === 0 && data.remove.length === 0) {
+                        data.msg = '没有新增或删除的条目！';
+                    }
+                } else {
+                    data.msg = '选择的文件不匹配！';
+                }
+                res.render('bilibili/compare', data);
+            });
+        } else {
+            data.msg = '未选择文件！';
+            res.render('bilibili/compare', data);
+        }
+    });
+    form.parse(req);
 });
 
 module.exports = router;

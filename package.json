@@ -13,6 +13,7 @@
         "hbs": "",
         "morgan": "",
         "stylus": "",
-        "request": ""
+        "request": "",
+        "multiparty": ""
     }
 }
