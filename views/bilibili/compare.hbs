@@ -3,16 +3,17 @@
     <p>{{msg}}</p>
 {{/if}}
 {{#if file}}
-    <p>比较源：{{file}}</p>
+    <p>本地文件：{{file}}</p>
 {{/if}}
 {{#if add.length}}
-    <h2>新增</h2>
+    <h2>服务端多出条目</h2>
     <ul>
-        {{#each add}}<li>{{title}}</li>{{/each}}
-    </ul>{{/if}}
+        {{#each add}}<li>{{_id}} - {{_title}}</li>{{/each}}
+    </ul>
+{{/if}}
 {{#if remove.length}}
-    <h2>删除</h2>
+    <h2>本地文件多出条目</h2>
     <ul>
-        {{#each remove}}<li>{{title}}</li>{{/each}}
+        {{#each remove}}<li>{{_id}} - {{_title}}</li>{{/each}}
     </ul>
 {{/if}}

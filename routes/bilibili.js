@@ -62,7 +62,12 @@ router.get('/bangumiList', function (req, res) {
     getList(req, res, 'http://space.bilibili.com/ajax/Bangumi/getList', function (name, list) {
         return {
             title: '哔哩哔哩订阅列表-' + name,
-            list: list
+            list: list.map(function (item) {
+                var obj = JSON.parse(JSON.stringify(item));
+                obj._title = obj.title;
+                obj._id = obj.season_id;
+                return obj;
+            })
         };
     });
 });
@@ -73,7 +78,8 @@ router.get('/followList', function (req, res) {
             title: '哔哩哔哩关注列表-' + name,
             list: list.map(function (item) {
                 var obj = JSON.parse(JSON.stringify(item));
-                obj.title = obj.uname;
+                obj._title = obj.uname;
+                obj._id = obj.fid;
                 return obj;
             })
         };
@@ -86,7 +92,8 @@ router.get('/fansList', function (req, res) {
             title: '哔哩哔哩粉丝列表-' + name,
             list: list.map(function (item) {
                 var obj = JSON.parse(JSON.stringify(item));
-                obj.title = obj.uname;
+                obj._title = obj.uname;
+                obj._id = obj.fid;
                 return obj;
             })
         };
@@ -97,30 +104,20 @@ router.get('/videoList', function (req, res) {
     getList(req, res, 'http://space.bilibili.com/ajax/member/getSubmitVideos', function (name, list) {
         return {
             title: '哔哩哔哩视频列表-' + name,
-            list: list
+            list: list.map(function (item) {
+                var obj = JSON.parse(JSON.stringify(item));
+                obj._title = obj.title;
+                obj._id = obj.aid;
+                return obj;
+            })
         };
     }, ['count', 'vlist']);
 });
 
 router.post('/*List', function (req, res) {
-    var key,
-        data = {},
+    var data = {},
         formData = {file: []},
         form = new multiparty.Form();
-    switch (req.path) {
-    case '/bangumiList':
-        key = 'season_id';
-        break;
-    case '/followList':
-    case '/fansList':
-        key = 'fid';
-        break;
-    case '/videoList':
-        key = 'aid';
-        break;
-    default:
-        key = 'id';
-    }
     form.on('field', function (key, val) {
         formData[key] = val;
     });
@@ -145,16 +142,16 @@ router.post('/*List', function (req, res) {
                 if (body.path === formData.file.path) {
                     data.add = body.list.filter(function (itemA) {
                         return formData.file.list.every(function (itemB) {
-                            return itemA[key] !== itemB[key];
+                            return itemA._id !== itemB._id;
                         });
                     });
                     data.remove = formData.file.list.filter(function (itemA) {
                         return body.list.every(function (itemB) {
-                            return itemA[key] !== itemB[key];
+                            return itemA._id !== itemB._id;
                         });
                     });
                     if (data.add.length === 0 && data.remove.length === 0) {
-                        data.msg = '没有新增或删除的条目！';
+                        data.msg = '条目没有任何区别！';
                     }
                 } else {
                     data.msg = '选择的文件不匹配！';
