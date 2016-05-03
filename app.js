@@ -4,6 +4,7 @@ var express = require('express'),
     cookieParser = require('cookie-parser'),
     bodyParser = require('body-parser'),
     bilibili = require('./routes/bilibili'),
+    utils = require('./routes/utils'),
     app = express();
 
 // view engine setup
@@ -17,6 +18,7 @@ app.use(cookieParser());
 app.use(require('stylus').middleware(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bilibili', bilibili);
+app.use('/utils', utils);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
