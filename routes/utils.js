@@ -31,12 +31,12 @@ router.post('/download', function (req, res) {
         res.write('开始下载\r\n');
         files.forEach(function (item) {
             var savePath = path.join(dirPath, item.replace(/(http|https):\/\/(.(?!\/))*.\//g, '')),
-                write = fs.createWriteStream(savePath);
+                ws = fs.createWriteStream(savePath);
             mkdirs(path.dirname(savePath));
             request.get(item).on('error', function (err) {
-                write.emit('error', err);
-            }).pipe(write).on('error', function () {
-                write.end();
+                ws.emit('error', err);
+            }).pipe(ws).on('error', function () {
+                ws.end();
             }).on('finish', function () {
                 res.write('已下载：' + savePath + ' 进度：' + ++length + '/' + files.length + '\r\n');
                 if (length === files.length) {
