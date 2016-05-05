@@ -114,10 +114,13 @@ router.get('/videoList', function (req, res) {
     }, ['count', 'vlist']);
 });
 
-router.post('/*List', function (req, res) {
+router.post('/*List', function (req, res, next) {
     var data = {},
         formData = {file: []},
         form = new multiparty.Form();
+    form.on('error', function (err) {
+        next(err);
+    });
     form.on('field', function (key, val) {
         formData[key] = val;
     });

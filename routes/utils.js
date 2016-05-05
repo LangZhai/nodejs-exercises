@@ -46,7 +46,8 @@ router.post('/download', function (req, res) {
             });
         });
     } else {
-        res.send('操作失败！');
+        res.write('操作失败！');
+        res.end();
     }
 });
 
