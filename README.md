@@ -1,2 +1,2 @@
 # nodejs-exercises
-Exercises of Node.js
+Exercises of Node.js.
