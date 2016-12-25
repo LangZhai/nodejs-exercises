@@ -9,6 +9,7 @@ $(function () {
         $result = $('>p>output', $footer),
         w = $article.width() * .5,
         h = $article.height() * .5;
+
     $section.on({
         dragstart: function (e) {
             $(this).data('offset', {offsetX: e.offsetX, offsetY: e.offsetY});
