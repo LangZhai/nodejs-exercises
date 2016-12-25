@@ -4,10 +4,13 @@
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
         <link rel="shortcut icon" type="image/x-icon" href="https://langzhai.github.io/favicon.ico">
         <link rel='stylesheet' href='/css/common.min.css'>
+        {{{block "css"}}}
         <title>{{title}}</title>
     </head>
     <body>
         {{{body}}}
+        <script src="/lib/jquery-3.x.min.js"></script>
         <script src="/js/common.min.js"></script>
+        {{{block "js"}}}
     </body>
 </html>

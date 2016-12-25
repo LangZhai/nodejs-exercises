@@ -1,0 +1,66 @@
+{{#extend "css"}}
+    <link rel='stylesheet' href='/css/frames/index.min.css'>
+{{/extend}}
+<header>
+    <h1>{{title}}</h1>
+</header>
+<article>
+    <section></section>
+    <section></section>
+    <section></section>
+    <section></section>
+    <div></div>
+    <aside>
+        <section class="curr">
+            <a href="javascript:">翅膀</a>
+            <ul></ul>
+        </section>
+        <section>
+            <a href="javascript:">武器</a>
+            <ul></ul>
+        </section>
+        <section>
+            <a href="javascript:">人物</a>
+            <ul></ul>
+        </section>
+        <section>
+            <a href="javascript:">技能</a>
+            <ul></ul>
+        </section>
+    </aside>
+</article>
+<footer>
+    <p>
+        <label>翅膀</label><input type="file" multiple accept="image/png">
+        <output></output>
+        <a href="/frames/save/?txt=">保存翅膀</a>
+    </p>
+    <p>
+        <label>武器</label><input type="file" multiple accept="image/png">
+        <output></output>
+        <a href="/frames/save/?txt=">保存武器</a>
+    </p>
+    <p>
+        <label>人物</label><input type="file" multiple accept="image/png">
+        <output></output>
+        <a href="/frames/save/?txt=">保存人物</a>
+    </p>
+    <p>
+        <label>技能</label><input type="file" multiple accept="image/png">
+        <output></output>
+        <a href="/frames/save/?txt=">保存技能</a>
+    </p>
+</footer>
+{{#extend "js"}}
+    <script id="template_figure" type="text/html">
+        <figure draggable>
+            <img src="#{data.src}">
+            <figcaption>#{data.name}</figcaption>
+        </figure>
+    </script>
+    <script id="template_li" type="text/html">
+        <li>#{data.name}</li>
+    </script>
+    <script src="https://langzhai.github.io/ZLTemplate/dist/jquery.zltemplate.min.js"></script>
+    <script src="/js/frames/index.min.js"></script>
+{{/extend}}

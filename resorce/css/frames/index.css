@@ -1,0 +1,107 @@
+body {
+  width: 1000px;
+  margin: 0 auto;
+}
+body > header {
+  text-align: center;
+}
+body > article {
+  position: relative;
+  width: 480px;
+  height: 600px;
+  margin: 0 auto;
+  outline: 1px solid #000;
+}
+body > article > section,
+body > article > div,
+body > article > aside {
+  position: absolute;
+}
+body > article > section {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+body > article > section > figure {
+  position: absolute;
+  margin: 0;
+  outline: 1px solid #00f;
+  opacity: 0.3;
+  pointer-events: none;
+}
+body > article > section > figure > img {
+  float: left;
+}
+body > article > section > figure > figcaption {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  text-align: center;
+  pointer-events: none;
+}
+body > article > section > figure.curr {
+  opacity: 1;
+}
+body > article > section.curr > figure.curr {
+  outline-color: #f00;
+  cursor: move;
+  pointer-events: auto;
+}
+body > article > div {
+  width: 6px;
+  height: 6px;
+  left: 50%;
+  top: 50%;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: #f00;
+}
+body > article > aside {
+  left: 490px;
+  outline: 1px solid #000;
+  width: 400px;
+  height: 30px;
+}
+body > article > aside > section {
+  float: left;
+  width: 25%;
+}
+body > article > aside > section > a {
+  display: block;
+  text-align: center;
+  background: #c8c8c8;
+  height: 30px;
+  line-height: 30px;
+}
+body > article > aside > section > ul {
+  left: 0;
+  top: 30px;
+  position: absolute;
+  display: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  outline: 1px solid #000;
+}
+body > article > aside > section > ul > li {
+  list-style: none;
+  cursor: pointer;
+}
+body > article > aside > section > ul > li.curr {
+  background: #f00;
+}
+body > article > aside > section.curr > a {
+  background: #9b9b9b;
+}
+body > article > aside > section.curr > ul {
+  display: block;
+}
+body > footer {
+  text-align: center;
+  margin-bottom: 20px;
+}
+body > footer > p > output {
+  display: block;
+}

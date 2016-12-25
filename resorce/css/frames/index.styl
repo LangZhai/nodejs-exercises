@@ -1,0 +1,113 @@
+body {
+    width: 1000px;
+    margin: 0 auto;
+    > header {
+        text-align: center;
+    }
+    > article {
+        position: relative;
+        width: 480px;
+        height: 600px;
+        margin: 0 auto;
+        outline: 1px solid rgb(0, 0, 0);
+        > section, > div, > aside {
+            position: absolute;
+        }
+        > section {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            > figure {
+                position: absolute;
+                margin: 0;
+                outline: 1px solid rgb(0, 0, 255);
+                opacity: .3;
+                pointer-events: none;
+                > img {
+                    float: left;
+                }
+                > figcaption {
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                    width: 100%;
+                    text-align: center;
+                    pointer-events: none;
+                }
+                &.curr {
+                    opacity: 1;
+                }
+            }
+            &.curr {
+                > figure {
+                    &.curr {
+                        outline-color: rgb(255, 0, 0);
+                        cursor: move;
+                        pointer-events: auto;
+                    }
+                }
+            }
+        }
+        > div {
+            width: 6px;
+            height: @width;
+            left: 50%;
+            top: 50%;
+            margin-left: (@width/ -2);
+            margin-top: @margin-left;
+            border-radius: 50%;
+            background: rgb(255, 0, 0);
+        }
+        > aside {
+            left: @width + 10;
+            outline: 1px solid rgb(0, 0, 0);
+            width: 400px;
+            height: 30px;
+            > section {
+                float: left;
+                width: 25%;
+                > a {
+                    display: block;
+                    text-align: center;
+                    background: rgb(200, 200, 200);
+                    height: @height;
+                    line-height: @height;
+                }
+                > ul {
+                    left: 0;
+                    top: @height;
+                    position: absolute;
+                    display: none;
+                    margin: 0;
+                    padding: 0;
+                    width: 100%;
+                    outline: @outline;
+                    > li {
+                        list-style: none;
+                        cursor: pointer;
+                        &.curr {
+                            background: rgb(255, 0, 0);
+                        }
+                    }
+                }
+                &.curr {
+                    > a {
+                        background: rgb(155, 155, 155);
+                    }
+                    > ul {
+                        display: block;
+                    }
+                }
+            }
+        }
+    }
+    > footer {
+        text-align: center;
+        margin-bottom: 20px;
+        > p {
+            > output {
+                display: block;
+            }
+        }
+    }
+}
