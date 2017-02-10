@@ -256,7 +256,7 @@ router.post('/auto', function (req, res) {
                 if (++index < objKeys.length) {
                     loop(objKeys[index]);
                 } else {
-                    writeln('SpriteFrames生成完成！');
+                    writeln('SpriteFrames生成结束！');
                     res.end();
                 }
             };
