@@ -135,7 +135,9 @@ router.post('/auto', function (req, res) {
                         }
                     } else {
                         var direction = files.length === 5 ? 8 : files.length;
-                        files.forEach(function (item, index) {
+                        files.sort(function (a, b) {
+                            return b - a > 0;
+                        }).forEach(function (item, index) {
                             var dirPath = path.join(dirIn, item);
                             count++;
                             fs.readdir(dirPath, function (err, files) {
@@ -205,13 +207,13 @@ router.post('/auto', function (req, res) {
                                                     });
                                                 }
                                                 pic.data = Buffer.from(result);
+                                                txt[index] = txt[index].reduce(function (a, b) {
+                                                    return a.concat(b);
+                                                });
                                                 writeln(dirPath + ' 演算完毕！');
                                                 mkdirs(path.join(outPath, dirOut), null, function () {
                                                     pic.pack().pipe(fs.createWriteStream(path.join(outPath, dirOut, picName[item] + '.png')).on('close', function () {
                                                         writeln(dirPath + ' 转换完毕！');
-                                                        txt[index] = txt[index].reduce(function (a, b) {
-                                                            return a.concat(b);
-                                                        });
                                                         if (--count === 0) {
                                                             fs.writeFile(path.join(outPath, dirOut, txtName + '.txt'), txt.reduce(function (a, b) {
                                                                 return a.concat(b);
