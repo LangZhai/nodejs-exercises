@@ -121,7 +121,7 @@ router.post('/auto', function (req, res) {
     fs.readFile(path.join(rootPath, 'list.json'), function (err, data) {
         var obj,
             objKeys = [],
-            index = 0,
+            index = -1,
             total = 0,
             deal = function (dirIn, dirOut, txtName, callback) {
                 var count = 0,
@@ -208,6 +208,7 @@ router.post('/auto', function (req, res) {
                                                 writeln(dirPath + ' 演算完毕！');
                                                 mkdirs(path.join(outPath, dirOut), null, function () {
                                                     pic.pack().pipe(fs.createWriteStream(path.join(outPath, dirOut, picName[item] + '.png')).on('close', function () {
+                                                        writeln(dirPath + ' 转换完毕！');
                                                         txt[index] = txt[index].reduce(function (a, b) {
                                                             return a.concat(b);
                                                         });
@@ -215,13 +216,12 @@ router.post('/auto', function (req, res) {
                                                             fs.writeFile(path.join(outPath, dirOut, txtName + '.txt'), txt.reduce(function (a, b) {
                                                                 return a.concat(b);
                                                             }, [direction, files.length]).join(), function () {
+                                                                writeln(dirIn + ' 生成完毕！');
                                                                 if (--total === 0) {
                                                                     callback();
                                                                 }
-                                                                writeln(dirIn + ' 生成完毕！');
                                                             });
                                                         }
-                                                        writeln(dirPath + ' 转换完毕！');
                                                     }));
                                                 });
                                             }
