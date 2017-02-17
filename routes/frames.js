@@ -123,7 +123,7 @@ router.post('/auto', function (req, res) {
             objKeys = [],
             index = -1,
             total = 0,
-            deal = function (dirIn, dirOut, txtName, callback) {
+            deal = function (dirIn, dirOut, txtName, offset, callback) {
                 var count = 0,
                     txt = [[], [], [], [], []];
                 total++;
@@ -135,6 +135,11 @@ router.post('/auto', function (req, res) {
                         }
                     } else {
                         var direction = files.length === 5 ? 8 : files.length;
+                        if (offset.length < files.length * 2) {
+                            offset.push.apply(offset, new Array(files.length * 2 - offset.length).join().split(',').map(function () {
+                                return 0;
+                            }));
+                        }
                         files.sort(function (a, b) {
                             return b - a > 0;
                         }).forEach(function (item, index) {
@@ -189,7 +194,7 @@ router.post('/auto', function (req, res) {
                                             datas[i].height = datas[i].y2 - datas[i].y1;
                                             width += datas[i].width;
                                             height = Math.max(height, datas[i].height);
-                                            txt[index][i] = [400 - datas[i].x1, 535 - datas[i].y1, datas[i].width, datas[i].height];
+                                            txt[index][i] = [400 - offset[index * 2] - datas[i].x1, 535 - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
                                                 pic = new PNG({width: width, height: height});
                                                 for (var y = 0; y < height; y++) {
@@ -246,12 +251,12 @@ router.post('/auto', function (req, res) {
                             callback();
                         } else {
                             files.forEach(function (fileName) {
-                                deal(path.join(dirIn, fileName), path.join(pathRoot, obj[item] + '_' + fileName), obj[item] + '_' + fileName, callback);
+                                deal(path.join(dirIn, fileName), path.join(pathRoot, obj[item].id + '_' + fileName), obj[item].id + '_' + fileName, obj[item].offset, callback);
                             });
                         }
                     });
                 } else {
-                    deal(dirIn, path.join(pathRoot, obj[item]), obj[item], callback);
+                    deal(dirIn, path.join(pathRoot, obj[item].id), obj[item].id, obj[item].offset, callback);
                 }
             },
             callback = function () {
