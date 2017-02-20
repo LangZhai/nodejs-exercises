@@ -3,25 +3,18 @@ $(function () {
         $template_li = $('#template_li'),
         $article = $('body>article'),
         $section = $('>section', $article),
-        $nav = $('>aside>section', $article),
-        $ul = $('>ul', $nav),
+        $ul = $('>aside>section>ul', $article),
         $footer = $('body>footer'),
         $result = $('>p>output', $footer),
         $target = $(),
-        w = $article.width() * .5,
-        h = $article.height() * .5,
         deal = function (offset, move) {
-            var $parent = $target.parent(),
-                $children = $parent.children(),
-                position = $target.position(),
+            var position = $target.position(),
                 txt;
             $target.css({left: position.left + move.offsetX - offset.offsetX, top: position.top + move.offsetY - offset.offsetY});
-            txt = [8, $children.length * .2].concat($.map($children, function (item) {
-                var $this = $(item),
-                    position = $this.position();
-                return [w - position.left, h - position.top, $this.width(), $this.height()];
-            })).join(',');
-            $result.eq($parent.index()).text(txt).end().next().attr('href', '/frames/save/?txt=' + txt);
+            txt = $.map($target.parent().children(), function (item) {
+                return $(item).position();
+            });
+            $result.text([txt[1].left - txt[0].left, txt[1].top - txt[0].top]);
         };
 
     $section.on({
@@ -32,28 +25,24 @@ $(function () {
             deal($target.data('offset'), {offsetX: e.offsetX, offsetY: e.offsetY});
         }
     }, '>figure.curr');
-    $nav.on('click', function () {
-        var $this = $(this);
-        $this.add($section.eq($this.index())).addClass('curr').siblings().removeClass('curr');
-    });
     $ul.on('click', '>li', function () {
-        var $this = $(this),
-            $parent = $section.eq($this.parent().parent().index());
-        $target = $parent.children(':eq(' + $this.index() + ')');
-        $this.add($target).add($parent).addClass('curr').siblings().removeClass('curr');
+        var $this = $(this);
+        $target = $section.children(':eq(' + $this.index() + ')');
+        $this.add($target).addClass('curr').siblings().removeClass('curr');
     });
     $footer.on('change', 'input[type=file]', function (event) {
         var index = $(this).parent().index(),
-            data = Array.from(event.target.files).map(function (item) {
-                return {src: window.URL.createObjectURL(item), name: item.name};
-            });
-        if (data.length % 5 !== 0) {
-            alert('请完整选择5个方向的图片！');
-            $(this).val('');
-            return;
+            data = {src: window.URL.createObjectURL(event.target.files[0]), name: event.target.files[0].name},
+            $children = $section.children(':eq(' + index + ')');
+        if (data) {
+            if ($children.length) {
+                $children.replaceWith($template_figure.template(data));
+                $ul.children(':eq(' + index + ')').replaceWith($template_li.template(data));
+            } else {
+                $section.append($template_figure.template(data));
+                $ul.append($template_li.template(data));
+            }
         }
-        $section.eq(index).html($template_figure.template(data));
-        $ul.eq(index).html($template_li.template(data));
     });
 
     $(document).on('keydown', function (e) {

@@ -12,6 +12,10 @@ router.get('/', function (req, res) {
     res.render('frames/index', {title: 'SpriteFrames编辑器'});
 });
 
+router.get('/offset', function (req, res) {
+    res.render('frames/offset', {title: 'SpriteFrames相对坐标'});
+});
+
 router.get('/save', function (req, res) {
     res.setHeader('Content-Type', 'text/json; charset=utf-8');
     res.setHeader('Content-Disposition', 'attachment; filename=unnamed.txt');

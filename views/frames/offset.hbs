@@ -1,0 +1,38 @@
+{{#extend "css"}}
+    <link rel='stylesheet' href='/css/frames/index.min.css'>
+{{/extend}}
+<header>
+    <h1>{{title}}</h1>
+</header>
+<article>
+    <section class="curr"></section>
+    <aside>
+        <section class="curr">
+            <ul></ul>
+        </section>
+    </aside>
+</article>
+<footer>
+    <p>
+        <label>下层</label><input type="file" accept="image/png">
+    </p>
+    <p>
+        <label>上层</label><input type="file" accept="image/png">
+    </p>
+    <p>
+        <output></output>
+    </p>
+</footer>
+{{#extend "js"}}
+    <script id="template_figure" type="text/html">
+        <figure draggable>
+            <img src="#{data.src}">
+            <figcaption>#{data.name}</figcaption>
+        </figure>
+    </script>
+    <script id="template_li" type="text/html">
+        <li>#{data.name}</li>
+    </script>
+    <script src="https://langzhai.github.io/ZLTemplate/dist/jquery.zltemplate.min.js"></script>
+    <script src="/js/frames/offset.min.js"></script>
+{{/extend}}
