@@ -197,7 +197,7 @@ router.post('/auto', function (req, res) {
                                             datas[i] = {data: arr, x1: x1, y1: Math.ceil(alpha.indexOf(1) / w), x2: x2, y2: Math.ceil(alpha.lastIndexOf(1) / w), width: x2 - x1 + 1};
                                             datas[i].height = datas[i].y2 - datas[i].y1;
                                             width += datas[i].width;
-                                            height = Math.max(height, datas[i].height);
+                                            height = Math.max(height, datas[i].height, 1);
                                             txt[index][i] = [400 - offset[index * 2] - datas[i].x1, 535 - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
                                                 pic = new PNG({width: width, height: height});
