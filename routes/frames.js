@@ -50,7 +50,7 @@ router.post('/list', function (req, res) {
                                     if (fileName === '180') {
                                         item = path.relative(rootPath, ['1', '2', '4'].indexOf(prevName) === -1 ? dirPath : prevPath);
                                         if (obj[item] === undefined) {
-                                            obj[item] = '';
+                                            obj[item] = {id: '', offset: []};
                                             res.write(item + '\r\n');
                                         }
                                     } else {
@@ -86,6 +86,7 @@ router.post('/auto', function (req, res) {
     forceWrite(res);
     var rootPath = req.body.rootPath,
         outPath = req.body.outPath,
+        isCenter = req.body.isCenter,
         picName = {
             '180': 'A',
             '135': 'B',
@@ -182,6 +183,7 @@ router.post('/auto', function (req, res) {
                                                     return item === 0 ? 0 : 1;
                                                 }),
                                                 w = this.width,
+                                                h = this.height,
                                                 x1 = w,
                                                 x2 = 0;
                                             alpha.forEach(function (item, i) {
@@ -198,7 +200,7 @@ router.post('/auto', function (req, res) {
                                             datas[i].height = datas[i].y2 - datas[i].y1;
                                             width += datas[i].width;
                                             height = Math.max(height, datas[i].height, 1);
-                                            txt[index][i] = [400 - offset[index * 2] - datas[i].x1, 535 - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
+                                            txt[index][i] = [(isCenter ? w * .5 : 400) - offset[index * 2] - datas[i].x1, (isCenter ? h * .5 : 535) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
                                                 pic = new PNG({width: width, height: height});
                                                 for (var y = 0; y < height; y++) {
