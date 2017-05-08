@@ -128,7 +128,7 @@ router.post('/auto', function (req, res) {
             objKeys = [],
             index = -1,
             total = 0,
-            deal = function (dirIn, dirOut, txtName, offset, callback) {
+            deal = function (dirIn, dirOut, txtName, offset, center, callback) {
                 var count = 0,
                     txt = [[], [], [], [], []];
                 total++;
@@ -200,7 +200,7 @@ router.post('/auto', function (req, res) {
                                             datas[i].height = datas[i].y2 - datas[i].y1;
                                             width += datas[i].width;
                                             height = Math.max(height, datas[i].height, 1);
-                                            txt[index][i] = [(isCenter ? w * .5 : 400) - offset[index * 2] - datas[i].x1, (isCenter ? h * .5 : 535) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
+                                            txt[index][i] = [(isCenter || center ? w * .5 : 400) - offset[index * 2] - datas[i].x1, (isCenter || center ? h * .5 : 535) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
                                                 pic = new PNG({width: width, height: height});
                                                 for (var y = 0; y < height; y++) {
@@ -257,12 +257,12 @@ router.post('/auto', function (req, res) {
                             callback();
                         } else {
                             files.forEach(function (fileName) {
-                                deal(path.join(dirIn, fileName), path.join(pathRoot, obj[item].id + '_' + fileName), obj[item].id + '_' + fileName, obj[item].offset, callback);
+                                deal(path.join(dirIn, fileName), path.join(pathRoot, obj[item].id + '_' + fileName), obj[item].id + '_' + fileName, obj[item].offset, obj[item].isCenter, callback);
                             });
                         }
                     });
                 } else {
-                    deal(dirIn, path.join(pathRoot, obj[item].id), obj[item].id, obj[item].offset, callback);
+                    deal(dirIn, path.join(pathRoot, obj[item].id), obj[item].id, obj[item].offset, obj[item].isCenter, callback);
                 }
             },
             callback = function () {
