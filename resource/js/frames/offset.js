@@ -14,7 +14,9 @@ $(function () {
             txt = $.map($target.parent().children(), function (item) {
                 return $(item).position();
             });
-            $result.text([txt[1].left - txt[0].left, txt[1].top - txt[0].top]);
+            if (txt.length) {
+                $result.text([txt[1].left - txt[0].left, txt[1].top - txt[0].top]);
+            }
         };
 
     $section.on({
