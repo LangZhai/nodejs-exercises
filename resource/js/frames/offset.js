@@ -1,6 +1,6 @@
 $(function () {
-    var $template_figure = $('#template_figure'),
-        $template_li = $('#template_li'),
+    var template_figure = ZLTemplate('#template_figure'),
+        template_li = ZLTemplate('#template_li'),
         $article = $('body>article'),
         $section = $('>section', $article),
         $ul = $('>aside>section>ul', $article),
@@ -32,15 +32,15 @@ $(function () {
     });
     $footer.on('change', 'input[type=file]', function (event) {
         var index = $(this).parent().index(),
-            data = {src: window.URL.createObjectURL(event.target.files[0]), name: event.target.files[0].name},
+            data = event.target.files[0] ? {src: window.URL.createObjectURL(event.target.files[0]), name: event.target.files[0].name} : null,
             $children = $section.children(':eq(' + index + ')');
         if (data) {
             if ($children.length) {
-                $children.replaceWith($template_figure.template(data));
-                $ul.children(':eq(' + index + ')').replaceWith($template_li.template(data));
+                $children.replaceWith(template_figure.template(data));
+                $ul.children(':eq(' + index + ')').replaceWith(template_li.template(data));
             } else {
-                $section.append($template_figure.template(data));
-                $ul.append($template_li.template(data));
+                $section.append(template_figure.template(data));
+                $ul.append(template_li.template(data));
             }
         }
     });
@@ -48,22 +48,22 @@ $(function () {
     $(document).on('keydown', function (e) {
         if ($target.length) {
             switch (e.keyCode) {
-            case 37:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: -1, offsetY: 0});
-                break;
-            case 38:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: -1});
-                break;
-            case 39:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: 1, offsetY: 0});
-                break;
-            case 40:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: 1});
-                break;
+                case 37:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: -1, offsetY: 0});
+                    break;
+                case 38:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: -1});
+                    break;
+                case 39:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: 1, offsetY: 0});
+                    break;
+                case 40:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: 1});
+                    break;
             }
         }
     });

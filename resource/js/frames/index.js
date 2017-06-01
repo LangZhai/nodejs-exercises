@@ -1,6 +1,6 @@
 $(function () {
-    var $template_figure = $('#template_figure'),
-        $template_li = $('#template_li'),
+    var template_figure = ZLTemplate('#template_figure'),
+        template_li = ZLTemplate('#template_li'),
         $article = $('body>article'),
         $section = $('>section', $article),
         $nav = $('>aside>section', $article),
@@ -52,29 +52,29 @@ $(function () {
             $(this).val('');
             return;
         }
-        $section.eq(index).html($template_figure.template(data));
-        $ul.eq(index).html($template_li.template(data));
+        $section.eq(index).html(template_figure.template(data));
+        $ul.eq(index).html(template_li.template(data));
     });
 
     $(document).on('keydown', function (e) {
         if ($target.length) {
             switch (e.keyCode) {
-            case 37:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: -1, offsetY: 0});
-                break;
-            case 38:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: -1});
-                break;
-            case 39:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: 1, offsetY: 0});
-                break;
-            case 40:
-                e.preventDefault();
-                deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: 1});
-                break;
+                case 37:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: -1, offsetY: 0});
+                    break;
+                case 38:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: -1});
+                    break;
+                case 39:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: 1, offsetY: 0});
+                    break;
+                case 40:
+                    e.preventDefault();
+                    deal({offsetX: 0, offsetY: 0}, {offsetX: 0, offsetY: 1});
+                    break;
             }
         }
     });
