@@ -162,8 +162,9 @@ router.post('/auto', function (req, res) {
                                     var num = files.length,
                                         datas = [],
                                         result = [],
+                                        prop = {width: [0], height: [0], count: [0]},
+                                        row = 0,
                                         width = 0,
-                                        height = 0,
                                         pic;
                                     files.forEach(function (fileName, i) {
                                         fs.createReadStream(path.join(dirPath, fileName)).pipe(new PNG()).on('error', function (err) {
@@ -198,25 +199,45 @@ router.post('/auto', function (req, res) {
                                             }
                                             datas[i] = {data: arr, x1: x1, y1: Math.ceil(alpha.indexOf(1) / w), x2: x2, y2: Math.ceil(alpha.lastIndexOf(1) / w), width: x2 - x1 + 1};
                                             datas[i].height = datas[i].y2 - datas[i].y1;
-                                            width += datas[i].width;
-                                            height = Math.max(height, datas[i].height, 1);
                                             txt[index][i] = [(isCenter || center ? w * .5 : 400) - offset[index * 2] - datas[i].x1, (isCenter || center ? h * .5 : 535) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
-                                                pic = new PNG({width: width, height: height});
-                                                for (var y = 0; y < height; y++) {
-                                                    datas.forEach(function (sub) {
-                                                        var start = ((y + sub.y1) * w + sub.x1) * 4,
-                                                            end = ((y + sub.y1) * w + sub.x2 + 1) * 4,
-                                                            line = sub.data.slice(start, end),
-                                                            diff = end - start - line.length;
-                                                        if (diff) {
-                                                            line.push.apply(line, new Array(diff).join().split(',').map(function () {
-                                                                return 0;
-                                                            }));
-                                                        }
-                                                        result.push.apply(result, line);
-                                                    });
-                                                }
+                                                datas.forEach(function (sub) {
+                                                    if (prop.width[row] + sub.width > 4000) {
+                                                        prop.width[++row] = 0;
+                                                        prop.height[row] = 0;
+                                                        prop.count[row] = 0;
+                                                    }
+                                                    prop.width[row] += sub.width;
+                                                    prop.height[row] = Math.max(sub.height, prop.height[row]);
+                                                    prop.count[row]++;
+                                                });
+                                                width = Math.max.apply(null, prop.width);
+                                                prop.height.forEach(function (height, row) {
+                                                    var s = prop.count.slice(0, row).reduce(function (a, b) {
+                                                        return a + b;
+                                                    }, 0),
+                                                        arr = datas.slice(s, s + prop.count[row]);
+                                                    for (var y = 0; y < height; y++) {
+                                                        arr.forEach(function (sub, i) {
+                                                            var start = ((y + sub.y1) * w + sub.x1) * 4,
+                                                                end = ((y + sub.y1) * w + sub.x2 + 1) * 4,
+                                                                line = sub.data.slice(start, end),
+                                                                diff = end - start - line.length + (i === arr.length - 1 ? width - prop.width[row] : 0) * 4;
+                                                            if (diff) {
+                                                                line.push.apply(line, new Array(diff).join().split(',').map(function () {
+                                                                    return 0;
+                                                                }));
+                                                            }
+                                                            result.push.apply(result, line);
+                                                        });
+                                                    }
+                                                });
+                                                pic = new PNG({
+                                                    width: width,
+                                                    height: prop.height.reduce(function (a, b) {
+                                                        return a + b;
+                                                    })
+                                                });
                                                 pic.data = Buffer.from(result);
                                                 txt[index] = txt[index].reduce(function (a, b) {
                                                     return a.concat(b);
