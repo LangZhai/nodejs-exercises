@@ -1,49 +1,59 @@
 #!/usr/bin/env node
-var app = require('../app'),
-    debug = require('debug')('nodejs-exercises:server'),
-    http = require('http'),
-    port = normalizePort(process.env.PORT || '3000'),
-    server = http.createServer(app);
+var hbs = require('hbs'),
+    path = require('path'),
+    express = require('express'),
+    app = express(),
+    bodyParser = require('body-parser'),
+    blocks = {};
 
-app.set('port', port);
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+// view engine setup
+hbs.registerPartials(path.join(__dirname, 'views'));
+hbs.registerHelper('extend', function (name, context) {
+    var block = blocks[name];
+    if (!block) {
+        block = blocks[name] = [];
+    }
+    block.push(context.fn(this));
+});
+hbs.registerHelper('block', function (name) {
+    var val = (blocks[name] || []).join('\n');
+    blocks[name] = [];
+    return val;
+});
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
-// Normalize a port into a number, string, or false.
-function normalizePort(val) {
-    var port = parseInt(val, 10);
-    if (isNaN(port)) {
-        return val;
-    }
-    if (port >= 0) {
-        return port;
-    }
-    return false;
-}
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(require('stylus').middleware(path.join(__dirname, 'resource')));
+app.use(express.static(path.join(__dirname, 'resource')));
 
-// Event listener for HTTP server "error" event.
-function onError(error) {
-    if (error.syscall !== 'listen') {
-        throw error;
+require('express-ws')(app);
+app.use('/bilibili', require('../routes/bilibili'));
+app.use('/utils', require('../routes/utils'));
+app.use('/frames', require('../routes/frames'));
+app.use('/websocket', require('../routes/websocket'));
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    var err = new Error();
+    err.status = 404;
+    next(err);
+});
+
+// error handlers
+app.use(function (err, req, res, next) {
+    if (err.status === undefined) {
+        err.status = 500;
+    } else if (err.status === 404) {
+        err.message = 'Not Found';
     }
-    var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
-    switch (error.code) {
-        case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
-            process.exit(1);
-            break;
-        case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
-            process.exit(1);
-            break;
-        default:
-            throw error;
-    }
-}
-// Event listener for HTTP server "listening" event.
-function onListening() {
-    var addr = server.address();
-    var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
-    debug('Listening on ' + bind);
-}
+    res.status(err.status);
+    res.render('error', {
+        title: err.message,
+        message: err.message,
+        error: app.get('env') === 'development' ? err : null
+    });
+});
+
+app.listen(3000);

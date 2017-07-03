@@ -6,13 +6,11 @@
         "start": "node ./bin/www"
     },
     "dependencies": {
-        "body-parser": "",
-        "cookie-parser": "",
-        "debug": "",
-        "express": "",
         "hbs": "",
-        "morgan": "",
+        "express": "",
+        "body-parser": "",
         "stylus": "",
+        "express-ws": "",
         "request": "",
         "multiparty": "",
         "pngjs": ""
