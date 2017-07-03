@@ -6,8 +6,8 @@
         "start": "node ./bin/www"
     },
     "dependencies": {
-        "hbs": "",
         "express": "",
+        "hbs": "",
         "body-parser": "",
         "stylus": "",
         "express-ws": "",

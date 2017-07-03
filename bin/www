@@ -1,13 +1,17 @@
 #!/usr/bin/env node
-var hbs = require('hbs'),
-    path = require('path'),
-    express = require('express'),
+var express = require('express'),
     app = express(),
+    hbs = require('hbs'),
+    path = require('path'),
     bodyParser = require('body-parser'),
     blocks = {};
 
+app.set('views', path.join(__dirname, '../views'));
+app.set('resource', path.join(__dirname, '../resource'));
+app.set('view engine', 'hbs');
+
 // view engine setup
-hbs.registerPartials(path.join(__dirname, 'views'));
+hbs.registerPartials(app.get('views'));
 hbs.registerHelper('extend', function (name, context) {
     var block = blocks[name];
     if (!block) {
@@ -20,13 +24,11 @@ hbs.registerHelper('block', function (name) {
     blocks[name] = [];
     return val;
 });
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'hbs');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(require('stylus').middleware(path.join(__dirname, 'resource')));
-app.use(express.static(path.join(__dirname, 'resource')));
+app.use(require('stylus').middleware(app.get('resource')));
+app.use(express.static(app.get('resource')));
 
 require('express-ws')(app);
 app.use('/bilibili', require('../routes/bilibili'));
