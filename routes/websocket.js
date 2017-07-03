@@ -1,5 +1,4 @@
-var express = require('express'),
-    router = express.Router();
+var router = require('express').Router();
 
 router.ws('/', function (ws) {
     ws.on('message', function (msg) {

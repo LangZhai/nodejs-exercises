@@ -1,8 +1,7 @@
-﻿var express = require('express'),
-    path = require('path'),
+﻿var router = require('express').Router(),
     fs = require('fs'),
+    path = require('path'),
     request = require('request'),
-    router = express.Router(),
     mkdirs = function (dirPath) {
         if (!fs.existsSync(dirPath)) {
             mkdirs(path.dirname(dirPath));

@@ -1,7 +1,6 @@
-var express = require('express'),
+var router = require('express').Router(),
     request = require('request'),
     multiparty = require('multiparty'),
-    router = express.Router(),
     mid = 2367398,
     getList = function (req, res, url, deal, keys, page, list) {
         if (keys === undefined) {
