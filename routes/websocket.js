@@ -5,8 +5,8 @@ var router = require('express').Router(),
             var type = obj[item];
             if (obj[item] instanceof Object) {
 
-            } else if (type === 'number' && (type = view.getUint8(offset++)) < 8) {
-                switch (type) {
+            } else if (type === 'number') {
+                switch (view.getUint8(offset++)) {
                     case 0:
                         obj[item] = view.getUint8(offset);
                         offset += 1;
