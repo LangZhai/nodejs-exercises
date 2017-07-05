@@ -1,5 +1,5 @@
 var router = require('express').Router(),
-    bufferify = require('../lib/json-bufferify');
+    bufferify = require('../modules/json-bufferify');
 
 router.ws('/', (ws) => {
     ws.on('message', (data) => {
