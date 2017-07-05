@@ -4,7 +4,7 @@
  * © 2017 LangZhai(智能小菜菜)
  * This is licensed under the GNU LGPL, version 3 or later.
  * For details, see: http://www.gnu.org/licenses/lgpl.html
- * Project home: https://github.com/LangZhai/ZLTemplate
+ * Project home: https://github.com/LangZhai/nodejs-exercises/tree/master/modules/json-bufferify
  */
 
 ((bufferify) => {
