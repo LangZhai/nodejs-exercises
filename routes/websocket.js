@@ -5,44 +5,42 @@ router.ws('/', (ws) => {
     ws.on('message', (data) => {
         var view,
             opcode,
-            data;
+            obj;
         if (data instanceof Buffer) {
             view = new DataView(new Uint8Array(data).buffer);
             opcode = view.getUint8(0);
             switch (opcode) {
                 case 1:
-                    data = {
+                    obj = {
                         id: 'string',
                         age: 'number',
                         sex: 'number',
                         name: 'string'
                     };
-                    bufferify.decode(1, data, view);
-                    ws.send(JSON.stringify(data));
+                    bufferify.decode(1, obj, view);
+                    ws.send(JSON.stringify(obj));
                     break;
                 case 2:
-                    data = [{
+                    obj = [{
                         index: 'number',
                         name: 'string'
                     }];
-                    bufferify.decode(1, data, view);
-                    ws.send(JSON.stringify(data));
+                    bufferify.decode(1, obj, view);
+                    ws.send(JSON.stringify(obj));
                     break;
                 case 3:
-                    data = {
+                    obj = {
                         arr: ['number'],
                         list: [{
                             index: 'number',
                             name: 'string'
                         }]
                     };
-                    bufferify.decode(1, data, view);
-                    ws.send(JSON.stringify(data));
+                    bufferify.decode(1, obj, view);
+                    ws.send(JSON.stringify(obj));
                     break;
                 case 4:
-                    data = ['number'];
-                    bufferify.decode(1, data, view);
-                    ws.send(JSON.stringify(data));
+                    ws.send(view);
                     break;
                 default:
                     ws.close(1008, `Unknown opcode ${opcode}`);
