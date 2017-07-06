@@ -51,6 +51,7 @@ Open "egretProperties.json" and Add the following code to "modules" node.
 ```javascript
 var view = bufferify.encode(0, { name: 'Bob', sex: 0, age: 25 });
 var ws = new WebSocket(url);
+ws.binaryType = 'arraybuffer';
 ws.send(view);
 ```
 
