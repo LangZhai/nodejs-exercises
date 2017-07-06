@@ -15,7 +15,7 @@ npm install json-bufferify
 
 ## Usage
 
-`Require json-bufferify.`
+### Require json-bufferify.
 
 In Node.js
 
@@ -46,7 +46,7 @@ Open "egretProperties.json" and Add the following code to "modules" node.
 }
 ```
 
-`Convert JSON to ArrayBuffer and send by WebSocket.`
+### Convert JSON to ArrayBuffer and send by WebSocket.
 
 ```javascript
 var view = bufferify.encode(0, { name: 'Bob', sex: 0, age: 25 });
@@ -54,7 +54,7 @@ var ws = new WebSocket(url);
 ws.send(view);
 ```
 
-`Revert ArrayBuffer to JSON.`
+### Revert ArrayBuffer to JSON.
 
 ```javascript
 ws.on('message', (data) => {
