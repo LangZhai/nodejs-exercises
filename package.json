@@ -13,6 +13,7 @@
         "express-ws": "",
         "request": "",
         "multiparty": "",
-        "pngjs": ""
+        "pngjs": "",
+        "json-bufferify":""
     }
 }
