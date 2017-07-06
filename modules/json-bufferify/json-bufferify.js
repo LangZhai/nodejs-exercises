@@ -37,7 +37,7 @@
 
     /**
      * Convert JSON to ArrayBuffer and return the DataView.
-     * @param {number} offset The start of the view where to store the data.
+     * @param {number} offset The start of the DataView where to store the data.
      * @param {Object} data The JSON data.
      */
     let encode = (offset, data) => {
@@ -51,13 +51,13 @@
 
     /**
      * Convert JSON to ArrayBuffer.
-     * @param {number} offset The start of the view where to store the data.
+     * @param {number} offset The start of the DataView where to store the data.
      * @param {Array} arr The data Array which for use in function 'encode'.
      * @param {Object} data The JSON data.
      */
     let _encode = (offset, arr, data) => {
         if (data instanceof Array) {
-            //Here is use a Uint8 to store the length of Array, so the length of Array can only be up to 255.
+            //Here is using a Uint8 to store the length of Array, so the length of Array can only be up to 255.
             arr.push({
                 val: data.length,
                 type: 'Uint8',
@@ -160,7 +160,7 @@
                     }
                 } else {
                     data[item] = data[item].split('').map(item => item.charCodeAt(0));
-                    //Here is use a Uint8 to store the length of string, so the length of string can only be up to 255.
+                    //Here is using a Uint8 to store the length of string, so the length of string can only be up to 255.
                     arr.push({
                         val: data[item].length,
                         type: 'Uint8',
@@ -182,11 +182,12 @@
 
     /**
      * Revert ArrayBuffer to JSON.
-     * @param {number} offset The start of the view where to read the data.
-     * @param {any} obj The template of JSON.
-     * @param {DataView} view The DataView of ArrayBuffer.
+     * @param {number} offset The start of the DataView where to read the data.
+     * @param {any} obj The template of the JSON.
+     * @param {ArrayBuffer|Buffer|DataView} source The ArrayBuffer, or the Buffer in Node.js, or the DataView of the ArrayBuffer.
      */
-    let decode = (offset, obj, view) => {
+    let decode = (offset, obj, source) => {
+        let view = source instanceof DataView ? source : new DataView(source instanceof ArrayBuffer ? source : new Uint8Array(source).buffer);
         if (obj instanceof Array) {
             obj.length = view.getUint8(offset++);
             obj.join().split(',').forEach((item, i) => obj[i] = extend(true, {}, obj[0]));
