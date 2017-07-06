@@ -17,25 +17,25 @@ npm install json-bufferify
 
 ### Require json-bufferify.
 
-`In Node.js`
+__In Node.js__
 
 ```javascript
 var bufferify = require('json-bufferify');
 ```
 
-`In browser`
+__In browser__
 
 ```html
 <script src="json-bufferify.js"></script>
 ```
 
-`In TypeScript`
+__In TypeScript__
 
 ```
 npm install @types/json-bufferify --save
 ```
 
-`In Egret`
+__In Egret__
 
 Open "egretProperties.json" and Add the following code to "modules" node.
 
