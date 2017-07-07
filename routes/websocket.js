@@ -5,39 +5,39 @@ router.ws('/', (ws) => {
     ws.on('message', (data) => {
         var view,
             opcode,
-            obj;
+            template;
         if (data instanceof Buffer) {
             view = new DataView(new Uint8Array(data).buffer);
             opcode = view.getUint8(0);
             switch (opcode) {
                 case 1:
-                    obj = {
+                    template = {
                         id: 'string',
                         age: 'number',
                         sex: 'number',
                         name: 'string'
                     };
-                    bufferify.decode(1, obj, view);
-                    ws.send(JSON.stringify(obj));
+                    bufferify.decode(1, template, view);
+                    ws.send(JSON.stringify(template));
                     break;
                 case 2:
-                    obj = [{
+                    template = [{
                         index: 'number',
                         name: 'string'
                     }];
-                    bufferify.decode(1, obj, view);
-                    ws.send(JSON.stringify(obj));
+                    bufferify.decode(1, template, view);
+                    ws.send(JSON.stringify(template));
                     break;
                 case 3:
-                    obj = {
+                    template = {
                         arr: ['number'],
                         list: [{
                             index: 'number',
                             name: 'string'
                         }]
                     };
-                    bufferify.decode(1, obj, view);
-                    ws.send(JSON.stringify(obj));
+                    bufferify.decode(1, template, view);
+                    ws.send(JSON.stringify(template));
                     break;
                 case 4:
                     ws.send(view);
