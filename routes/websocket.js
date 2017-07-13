@@ -83,7 +83,7 @@ router.ws('/', (ws) => {
                 view.setUint16(0, opcode);
                 ws.send(view);
             } else if (opcode <= SystemSendOP.ENUM_START || opcode >= TestSendOP.ENUM_END) {
-                ws.close(1008, `Unknown opcode ${opcode}`);
+                ws.close(3000, `Unknown opcode ${opcode}`);
             } else {
                 switch (opcode) {
                     case TestSendOP.SEND_JSON:
@@ -93,7 +93,7 @@ router.ws('/', (ws) => {
                 }
             }
         } else {
-            ws.close(1008, 'Not Buffer');
+            ws.close(3000, 'Not Buffer');
         }
     });
     ws.on('close', () => {
