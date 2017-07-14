@@ -140,8 +140,8 @@ router.post('/auto', function (req, res) {
                     } else {
                         var direction = files.length === 5 ? 8 : files.length;
                         if (offset.length < files.length * 2) {
-                            offset.push.apply(offset, new Array(files.length * 2 - offset.length).join().split(',').map(function () {
-                                return 0;
+                            offset.push.apply(offset, new Array(files.length * 2 - offset.length).join().split(',').map(function (item, i) {
+                                return offset[i % 2] || 0;
                             }));
                         }
                         files.sort(function (a, b) {
@@ -165,6 +165,13 @@ router.post('/auto', function (req, res) {
                                         row = 0,
                                         width = 0,
                                         pic;
+                                    if (num === 0) {
+                                        if (--count === 0) {
+                                            if (--total === 0) {
+                                                callback();
+                                            }
+                                        }
+                                    }
                                     files.forEach(function (fileName, i) {
                                         fs.createReadStream(path.join(dirPath, fileName)).pipe(new PNG()).on('error', function (err) {
                                             writeln(err.message);
@@ -198,7 +205,7 @@ router.post('/auto', function (req, res) {
                                             }
                                             datas[i] = {data: arr, x1: x1, y1: Math.ceil(alpha.indexOf(1) / w), x2: x2, y2: Math.ceil(alpha.lastIndexOf(1) / w), width: x2 - x1 + 1};
                                             datas[i].height = datas[i].y2 - datas[i].y1;
-                                            txt[index][i] = [(isCenter || center ? w * .5 : 400) - offset[index * 2] - datas[i].x1, (isCenter || center ? h * .5 : 535) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
+                                            txt[index][i] = [(isCenter || center ? w * .5 : 240) - offset[index * 2] - datas[i].x1, (isCenter || center ? h * .5 : 300) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
                                                 datas.forEach(function (sub) {
                                                     if (prop.width[row] + sub.width > 4000) {
