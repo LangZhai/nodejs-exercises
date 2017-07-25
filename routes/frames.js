@@ -86,6 +86,7 @@ router.post('/auto', (req, res) => {
     var rootPath = req.body.rootPath,
         outPath = req.body.outPath,
         isCenter = req.body.isCenter,
+        isFull = req.body.isFull,
         picName = {
             '180': 'A',
             '135': 'B',
@@ -127,7 +128,7 @@ router.post('/auto', (req, res) => {
             objKeys = [],
             index = -1,
             total = 0,
-            deal = (dirIn, dirOut, txtName, offset, center, callback) => {
+            deal = (dirIn, dirOut, txtName, offset, center) => {
                 var count = 0,
                     txt = [[], [], [], [], []];
                 total++;
@@ -206,53 +207,54 @@ router.post('/auto', (req, res) => {
                                             }
                                             datas[i] = {data: arr, x1: x1, y1: Math.ceil(alpha.indexOf(1) / w), x2: x2, y2: Math.ceil(alpha.lastIndexOf(1) / w), width: x2 - x1 + 1};
                                             datas[i].height = datas[i].y2 - datas[i].y1;
-                                            txt[index][i] = [(isCenter || center ? w * .5 : 240) - offset[index * 2] - datas[i].x1, (isCenter || center ? h * .5 : 300) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
+                                            txt[index][i] = [(center ? w * .5 : 240) - offset[index * 2] - datas[i].x1, (center ? h * .5 : 300) - offset[index * 2 + 1] - datas[i].y1, datas[i].width, datas[i].height];
                                             if (--num === 0) {
-                                                datas.forEach(sub => {
-                                                    if (prop.width[row] + sub.width > 4000) {
-                                                        prop.width[++row] = 0;
-                                                        prop.height[row] = 0;
-                                                        prop.count[row] = 0;
-                                                    }
-                                                    prop.width[row] += sub.width;
-                                                    prop.height[row] = Math.max(sub.height, prop.height[row], 1);
-                                                    prop.count[row]++;
-                                                });
-                                                width = Math.max.apply(null, prop.width);
-                                                prop.height.forEach((height, row) => {
-                                                    var s = prop.count.slice(0, row).reduce((a, b) => {
-                                                        return a + b;
-                                                    }, 0),
-                                                        arr = datas.slice(s, s + prop.count[row]);
-                                                    for (var y = 0; y < height; y++) {
-                                                        arr.forEach((sub, i) => {
-                                                            var start = ((y + sub.y1) * w + sub.x1) * 4,
-                                                                end = ((y + sub.y1) * w + sub.x2 + 1) * 4,
-                                                                line = sub.data.slice(start, end),
-                                                                diff = end - start - line.length + (i === arr.length - 1 ? width - prop.width[row] : 0) * 4;
-                                                            if (diff) {
-                                                                line.push.apply(line, new Array(diff).join().split(',').map(() => {
-                                                                    return 0;
-                                                                }));
-                                                            }
-                                                            result.push.apply(result, line);
-                                                        });
-                                                    }
-                                                });
-                                                pic = new PNG({
-                                                    width: width,
-                                                    height: prop.height.reduce((a, b) => {
-                                                        return a + b;
-                                                    })
-                                                });
-                                                pic.data = Buffer.from(result);
+                                                if (isFull) {
+                                                    datas.forEach(sub => {
+                                                        if (prop.width[row] + sub.width > 4000) {
+                                                            prop.width[++row] = 0;
+                                                            prop.height[row] = 0;
+                                                            prop.count[row] = 0;
+                                                        }
+                                                        prop.width[row] += sub.width;
+                                                        prop.height[row] = Math.max(sub.height, prop.height[row], 1);
+                                                        prop.count[row]++;
+                                                    });
+                                                    width = Math.max.apply(null, prop.width);
+                                                    prop.height.forEach((height, row) => {
+                                                        var s = prop.count.slice(0, row).reduce((a, b) => {
+                                                            return a + b;
+                                                        }, 0),
+                                                            arr = datas.slice(s, s + prop.count[row]);
+                                                        for (var y = 0; y < height; y++) {
+                                                            arr.forEach((sub, i) => {
+                                                                var start = ((y + sub.y1) * w + sub.x1) * 4,
+                                                                    end = ((y + sub.y1) * w + sub.x2 + 1) * 4,
+                                                                    line = sub.data.slice(start, end),
+                                                                    diff = end - start - line.length + (i === arr.length - 1 ? width - prop.width[row] : 0) * 4;
+                                                                if (diff) {
+                                                                    line.push.apply(line, new Array(diff).join().split(',').map(() => {
+                                                                        return 0;
+                                                                    }));
+                                                                }
+                                                                result.push.apply(result, line);
+                                                            });
+                                                        }
+                                                    });
+                                                    pic = new PNG({
+                                                        width: width,
+                                                        height: prop.height.reduce((a, b) => {
+                                                            return a + b;
+                                                        })
+                                                    });
+                                                    pic.data = Buffer.from(result);
+                                                }
                                                 txt[index] = txt[index].reduce((a, b) => {
                                                     return a.concat(b);
                                                 });
                                                 writeln(dirPath + ' 演算完毕！');
                                                 mkdirs(path.join(outPath, dirOut), null, () => {
-                                                    pic.pack().pipe(fs.createWriteStream(path.join(outPath, dirOut, picName[item] + '.png')).on('close', () => {
-                                                        writeln(dirPath + ' 转换完毕！');
+                                                    var save = () => {
                                                         if (--count === 0) {
                                                             fs.writeFile(path.join(outPath, dirOut, txtName + '.txt'), txt.reduce((a, b) => {
                                                                 return a.concat(b);
@@ -263,7 +265,15 @@ router.post('/auto', (req, res) => {
                                                                 }
                                                             });
                                                         }
-                                                    }));
+                                                    };
+                                                    if (isFull) {
+                                                        pic.pack().pipe(fs.createWriteStream(path.join(outPath, dirOut, picName[item] + '.png')).on('close', () => {
+                                                            writeln(dirPath + ' 转换完毕！');
+                                                            save();
+                                                        }));
+                                                    } else {
+                                                        save();
+                                                    }
                                                 });
                                             }
                                         });
@@ -285,12 +295,12 @@ router.post('/auto', (req, res) => {
                             callback();
                         } else {
                             files.forEach(fileName => {
-                                deal(path.join(dirIn, fileName), path.join(pathRoot, obj[item].id + '_' + fileName), obj[item].id + '_' + fileName, obj[item].offset, obj[item].isCenter, callback);
+                                deal(path.join(dirIn, fileName), path.join(pathRoot, obj[item].id + '_' + fileName), obj[item].id + '_' + fileName, obj[item].offset, obj[item].isCenter);
                             });
                         }
                     });
                 } else {
-                    deal(dirIn, path.join(pathRoot, obj[item].id), obj[item].id, obj[item].offset, obj[item].isCenter, callback);
+                    deal(dirIn, path.join(pathRoot, obj[item].id), obj[item].id, obj[item].offset, obj[item].isCenter);
                 }
             },
             callback = () => {
@@ -311,8 +321,9 @@ router.post('/auto', (req, res) => {
             });
             objKeys = Object.keys(obj);
             objKeys.forEach((key) => {
-                var offset = obj[key].offset;
-                offset.forEach((val, i) => offset[i] += obj.baseOffset[i % 2 === 0 ? 0 : 1]);
+                var item = obj[key];
+                item.offset.forEach((val, i) => item.offset[i] += obj.baseOffset[i % 2 === 0 ? 0 : 1]);
+                item.isCenter = isCenter || item.isCenter;
             });
             callback();
         }
