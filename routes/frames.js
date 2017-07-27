@@ -39,7 +39,7 @@ router.post('/list', (req, res) => {
             count++;
             fs.readdir(dirPath, (err, files) => {
                 if (err) {
-                    res.write(err.message + '\r\n');
+                    res.write(`${err.message}\r\n`);
                     if (--count === 0) {
                         callback();
                     }
@@ -54,7 +54,7 @@ router.post('/list', (req, res) => {
                                         item = path.relative(rootPath, ['1', '2', '4'].indexOf(prevName) === -1 ? dirPath : prevPath);
                                         if (obj[item] === undefined) {
                                             obj[item] = {id: '', offset: []};
-                                            res.write(item + '\r\n');
+                                            res.write(`${item}\r\n`);
                                         }
                                     } else {
                                         readPath(path.join(dirPath, fileName), callback, dirPath, fileName);
@@ -122,7 +122,7 @@ router.post('/auto', async (req, res) => {
             leave = leave % (3600 * 1000);
             minutes = Math.floor(leave / (60 * 1000));
             seconds = Math.round(leave % (60 * 1000) / 1000);
-            res.write(`[${(days ? days + 'days ' : '') + (hours < 10 ? '0' + hours : hours) + ':' + (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds)}] ${content}\r\n`);
+            res.write(`[${days ? `${days}days ` : ''}${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}] ${content}\r\n`);
         },
         deal = (dirIn, dirOut, txtName, offset, center) => {
             return new Promise(async (resolve, reject) => {
@@ -227,11 +227,11 @@ router.post('/auto', async (req, res) => {
                                         txt[index] = txt[index].reduce((a, b) => {
                                             return a.concat(b);
                                         });
-                                        writeln(dirPath + ' 演算完毕！');
+                                        writeln(`${dirPath} 演算完毕！`);
                                         await mkdirs(path.join(outPath, dirOut), null);
                                         if (isFull) {
-                                            pic.pack().pipe(fq.createWriteStream(path.join(outPath, dirOut, picName[item] + '.png')).on('close', () => {
-                                                writeln(dirPath + ' 转换完毕！');
+                                            pic.pack().pipe(fq.createWriteStream(path.join(outPath, dirOut, `${picName[item]}.png`)).on('close', () => {
+                                                writeln(`${dirPath} 转换完毕！`);
                                                 resolve();
                                             }));
                                         } else {
@@ -245,10 +245,10 @@ router.post('/auto', async (req, res) => {
                                 }
                             });
                         }));
-                        await fs.writeFileAsync(path.join(outPath, dirOut, txtName + '.txt'), txt.reduce((a, b) => {
+                        await fs.writeFileAsync(path.join(outPath, dirOut, `${txtName}.txt`), txt.reduce((a, b) => {
                             return a.concat(b);
                         }, [direction, files.length]).join());
-                        writeln(dirIn + ' 生成完毕！');
+                        writeln(`${dirIn} 生成完毕！`);
                         resolve();
                     } catch (err) {
                         reject(err);
@@ -276,7 +276,7 @@ router.post('/auto', async (req, res) => {
                     if (pathRoot === 'actor') {
                         try {
                             (await fs.readdirAsync(dirIn)).forEach(fileName => {
-                                task.push(deal(path.join(dirIn, fileName), path.join(pathRoot, item.id + '_' + fileName), item.id + '_' + fileName, item.offset, item.isCenter));
+                                task.push(deal(path.join(dirIn, fileName), path.join(pathRoot, `${item.id}_${fileName}`), `${item.id}_${fileName}`, item.offset, item.isCenter));
                             });
                         } catch (err) {
                             reject(err);
