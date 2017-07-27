@@ -1,6 +1,5 @@
 var router = require('express').Router(),
     fs = require('fs'),
-    fq = new (require('filequeue'))(500),
     path = require('path'),
     PNG = require('pngjs').PNG,
     Promise = require('bluebird'),
@@ -30,55 +29,56 @@ router.get('/list', (req, res) => {
     res.render('frames/list', {title: 'SpriteFrames列表'});
 });
 
-router.post('/list', (req, res) => {
+router.post('/list', async (req, res) => {
     forceWrite(res);
     var rootPath = req.body.rootPath,
         obj = {},
-        count = 0,
-        readPath = (dirPath, callback, prevPath, prevName) => {
-            count++;
-            fs.readdir(dirPath, (err, files) => {
-                if (err) {
-                    res.write(`${err.message}\r\n`);
-                    if (--count === 0) {
-                        callback();
-                    }
-                } else {
-                    var num = files.length,
+        readPath = (dirPath, prevPath, prevName) => {
+            return new Promise(async (resolve, reject) => {
+                try {
+                    var files = await fs.readdirAsync(dirPath),
                         item;
-                    if (num) {
-                        files.forEach(fileName => {
-                            fs.stat(path.join(dirPath, fileName), (err, stats) => {
-                                if (stats.isDirectory()) {
-                                    if (fileName === '180') {
-                                        item = path.relative(rootPath, ['1', '2', '4'].indexOf(prevName) === -1 ? dirPath : prevPath);
-                                        if (obj[item] === undefined) {
-                                            obj[item] = {id: '', offset: []};
-                                            res.write(`${item}\r\n`);
+                    if (!files.length) {
+                        resolve();
+                    }
+                    try {
+                        await Promise.all(files.map(fileName => {
+                            return new Promise(async (resolve, reject) => {
+                                try {
+                                    if ((await fs.statAsync(path.join(dirPath, fileName))).isDirectory()) {
+                                        if (fileName === '180') {
+                                            item = path.relative(rootPath, ['1', '2', '4'].indexOf(prevName) === -1 ? dirPath : prevPath);
+                                            if (obj[item] === undefined) {
+                                                obj[item] = {id: '', offset: []};
+                                                res.write(`${item}\r\n`);
+                                            }
+                                        } else {
+                                            await readPath(path.join(dirPath, fileName), dirPath, fileName);
                                         }
-                                    } else {
-                                        readPath(path.join(dirPath, fileName), callback, dirPath, fileName);
                                     }
-                                }
-                                if (--num === 0) {
-                                    if (--count === 0) {
-                                        callback();
-                                    }
+                                    resolve();
+                                } catch (err) {
+                                    reject(err);
                                 }
                             });
-                        });
-                    } else {
-                        if (--count === 0) {
-                            callback();
-                        }
+                        }));
+                        resolve();
+                    } catch (err) {
+                        reject(err);
                     }
+                } catch (err) {
+                    reject(err);
                 }
             });
         };
-    readPath(rootPath, () => {
-        fs.writeFile(path.join(rootPath, 'list.json'), JSON.stringify(obj, null, 2));
-        res.end();
-    });
+    try {
+        await readPath(rootPath);
+        await fs.writeFileAsync(path.join(rootPath, 'list.json'), JSON.stringify(obj, null, 2));
+    } catch (err) {
+        res.write(`${err.message}\r\n`);
+    }
+    res.write('结束');
+    res.end();
 });
 
 router.get('/auto', (req, res) => {
@@ -140,22 +140,22 @@ router.post('/auto', async (req, res) => {
                             return b - a > 0;
                         }).map((item, index) => {
                             return new Promise(async (resolve, reject) => {
-                                var dirPath = path.join(dirIn, item);
+                                var dirPath = path.join(dirIn, item),
+                                    datas = [],
+                                    result = [],
+                                    prop = {width: [0], height: [0], count: [0]},
+                                    row = 0,
+                                    width = 0,
+                                    pic;
                                 try {
                                     files = await fs.readdirAsync(dirPath);
-                                    var datas = [],
-                                        result = [],
-                                        prop = {width: [0], height: [0], count: [0]},
-                                        row = 0,
-                                        width = 0,
-                                        pic;
                                     if (!files.length) {
                                         resolve();
                                     }
                                     try {
                                         await Promise.all(files.map((fileName, i) => {
                                             return new Promise((resolve, reject) => {
-                                                pic = fq.createReadStream(path.join(dirPath, fileName)).pipe(new PNG());
+                                                pic = fs.createReadStream(path.join(dirPath, fileName)).pipe(new PNG());
                                                 pic.on('error', err => {
                                                     reject(err);
                                                 }).on('parsed', data => {
@@ -230,7 +230,7 @@ router.post('/auto', async (req, res) => {
                                         writeln(`${dirPath} 演算完毕！`);
                                         await mkdirs(path.join(outPath, dirOut), null);
                                         if (isFull) {
-                                            pic.pack().pipe(fq.createWriteStream(path.join(outPath, dirOut, `${picName[item]}.png`)).on('close', () => {
+                                            pic.pack().pipe(fs.createWriteStream(path.join(outPath, dirOut, `${picName[item]}.png`)).on('close', () => {
                                                 writeln(`${dirPath} 转换完毕！`);
                                                 resolve();
                                             }));
