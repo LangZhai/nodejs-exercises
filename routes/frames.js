@@ -87,7 +87,9 @@ router.get('/auto', (req, res) => {
 
 router.post('/auto', async (req, res) => {
     forceWrite(res);
-    var rootPath = req.body.rootPath,
+    var obj,
+        objKeys,
+        rootPath = req.body.rootPath,
         outPath = req.body.outPath,
         isCenter = req.body.isCenter,
         isFull = req.body.isFull,
@@ -257,43 +259,53 @@ router.post('/auto', async (req, res) => {
                     reject(err);
                 }
             });
-        };
-    res.write('[00:00:00] SpriteFrames生成开始！\r\n');
-    try {
-        var obj = JSON.parse(await fs.readFileAsync(path.join(rootPath, 'list.json')));
-        Object.defineProperty(obj, 'baseOffset', {
-            enumerable: false
-        });
-        try {
-            await Promise.all(Object.keys(obj).map(key => {
-                var item = obj[key];
-                item.offset.forEach((val, i) => item.offset[i] += obj.baseOffset[i % 2 === 0 ? 0 : 1]);
-                item.isCenter = isCenter || item.isCenter;
-                return new Promise(async (resolve, reject) => {
-                    var pathRoot = key.split(path.sep)[0],
-                        dirIn = path.join(rootPath, key),
-                        task = [];
-                    if (pathRoot === 'actor') {
-                        try {
-                            (await fs.readdirAsync(dirIn)).forEach(fileName => {
-                                task.push(deal(path.join(dirIn, fileName), path.join(pathRoot, `${item.id}_${fileName}`), `${item.id}_${fileName}`, item.offset, item.isCenter));
-                            });
-                        } catch (err) {
-                            reject(err);
-                        }
-                    } else {
-                        task.push(deal(dirIn, path.join(pathRoot, item.id), item.id, item.offset, item.isCenter));
-                    }
+        },
+        loop = (key) => {
+            return new Promise(async (resolve, reject) => {
+                var item = obj[key],
+                    pathRoot = key.split(path.sep)[0],
+                    dirIn = path.join(rootPath, key),
+                    task = [];
+                if (pathRoot === 'actor') {
                     try {
-                        await Promise.all(task);
-                        resolve();
+                        (await fs.readdirAsync(dirIn)).forEach(fileName => {
+                            task.push(deal(path.join(dirIn, fileName), path.join(pathRoot, `${item.id}_${fileName}`), `${item.id}_${fileName}`, item.offset, item.isCenter));
+                        });
                     } catch (err) {
                         reject(err);
                     }
-                });
-            }));
-        } catch (err) {
-            writeln(err.message);
+                } else {
+                    task.push(deal(dirIn, path.join(pathRoot, item.id), item.id, item.offset, item.isCenter));
+                }
+                try {
+                    await Promise.all(task);
+                    if (objKeys.length) {
+                        await loop(objKeys.shift());
+                    }
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        };
+    res.write('[00:00:00] SpriteFrames生成开始！\r\n');
+    try {
+        obj = JSON.parse(await fs.readFileAsync(path.join(rootPath, 'list.json')));
+        Object.defineProperty(obj, 'baseOffset', {
+            enumerable: false
+        });
+        objKeys = Object.keys(obj);
+        objKeys.forEach(key => {
+            var item = obj[key];
+            item.offset.forEach((val, i) => item.offset[i] += obj.baseOffset[i % 2 === 0 ? 0 : 1]);
+            item.isCenter = isCenter || item.isCenter;
+        });
+        if (objKeys.length) {
+            try {
+                await loop(objKeys.shift());
+            } catch (err) {
+                writeln(err.message);
+            }
         }
     } catch (err) {
         writeln(err.message);
