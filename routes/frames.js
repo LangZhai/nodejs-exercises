@@ -100,7 +100,7 @@ router.post('/auto', async (req, res) => {
             '45': 'D',
             '0': 'E'
         },
-        start = new Date(),
+        start,
         mkdirs = (dirname, mode) => {
             return new Promise(async resolve => {
                 try {
@@ -114,7 +114,8 @@ router.post('/auto', async (req, res) => {
             });
         },
         writeln = content => {
-            var diff = new Date().getTime() - start.getTime(),
+            var current = new Date().getTime(),
+                diff = current - (start ? start : (start = current)),
                 leave = diff % (24 * 3600 * 1000),
                 days = Math.floor(diff / (24 * 3600 * 1000)),
                 hours,
@@ -288,7 +289,7 @@ router.post('/auto', async (req, res) => {
                 }
             });
         };
-    res.write('[00:00:00] SpriteFrames生成开始！\r\n');
+    writeln('SpriteFrames生成开始！');
     try {
         obj = JSON.parse(await fs.readFileAsync(path.join(rootPath, 'list.json')));
         Object.defineProperty(obj, 'baseOffset', {
