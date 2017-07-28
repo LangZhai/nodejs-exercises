@@ -7,6 +7,8 @@ $(function () {
         $footer = $('body>footer'),
         $result = $('>p>output', $footer),
         $target = $(),
+        list = [],
+        curr = 0,
         deal = function (offset, move) {
             var position = $target.position(),
                 txt;
@@ -34,15 +36,21 @@ $(function () {
     });
     $footer.on('change', 'input[type=file]', function (event) {
         var index = $(this).parent().index(),
-            data = event.target.files[0] ? {src: window.URL.createObjectURL(event.target.files[0]), name: event.target.files[0].name} : null,
             $children = $section.children(':eq(' + index + ')');
-        if (data) {
+        curr = 0;
+        list[index] = Array.prototype.map.call(event.target.files, function (item) {
+            return {
+                src: window.URL.createObjectURL(item),
+                name: item.name
+            };
+        });
+        if (list[index].length) {
             if ($children.length) {
-                $children.replaceWith(template_figure.template(data));
-                $ul.children(':eq(' + index + ')').replaceWith(template_li.template(data));
+                $children.replaceWith(template_figure.template(list[index][curr]));
+                $ul.children(':eq(' + index + ')').replaceWith(template_li.template(list[index][curr]));
             } else {
-                $section.append(template_figure.template(data));
-                $ul.append(template_li.template(data));
+                $section.append(template_figure.template(list[index][curr]));
+                $ul.append(template_li.template(list[index][curr]));
             }
         }
     });
@@ -69,4 +77,25 @@ $(function () {
             }
         }
     });
+
+    setInterval(function () {
+        list.forEach(function (item, index) {
+            var $children = $section.children(':eq(' + index + ')'),
+                $img = $children.children('img'),
+                $figcaption = $children.children('figcaption');
+            if (item[curr]) {
+                $img.prop('src', item[curr].src);
+                $figcaption.text(item[curr].name);
+            } else {
+                $img.prop('src', '');
+                $figcaption.text('');
+            }
+        });
+        curr++;
+        if (curr === Math.max.apply(null, list.map(function (item) {
+            return item.length;
+        }))) {
+            curr = 0;
+        }
+    }, 85);
 });
