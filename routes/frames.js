@@ -32,6 +32,7 @@ router.get('/list', (req, res) => {
 router.post('/list', async (req, res) => {
     forceWrite(res);
     var rootPath = req.body.rootPath,
+        old,
         obj = {},
         readPath = (dirPath, prevPath, prevName) => {
             return new Promise(async (resolve, reject) => {
@@ -48,7 +49,7 @@ router.post('/list', async (req, res) => {
                                     if ((await fs.statAsync(path.join(dirPath, fileName))).isDirectory()) {
                                         if (fileName === '180') {
                                             item = path.relative(rootPath, ['1', '2', '4'].indexOf(prevName) === -1 ? dirPath : prevPath);
-                                            if (obj[item] === undefined) {
+                                            if (!obj[item]) {
                                                 obj[item] = {id: '', offset: []};
                                                 res.write(`${item}\r\n`);
                                             }
@@ -72,7 +73,20 @@ router.post('/list', async (req, res) => {
             });
         };
     try {
+        old = JSON.parse(await fs.readFileAsync(path.join(rootPath, 'list.json')));
+        if (old.baseOffset) {
+            obj.baseOffset = old.baseOffset;
+        }
+    } catch (err) {
+        old = {};
+    }
+    try {
         await readPath(rootPath);
+        Object.keys(obj).forEach(item => {
+            if (old[item]) {
+                obj[item] = old[item];
+            }
+        });
         await fs.writeFileAsync(path.join(rootPath, 'list.json'), JSON.stringify(obj, null, 2));
     } catch (err) {
         res.write(`${err.message}\r\n`);
