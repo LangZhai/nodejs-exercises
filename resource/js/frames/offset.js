@@ -80,15 +80,10 @@ $(function () {
 
     setInterval(function () {
         list.forEach(function (item, index) {
-            var $children = $section.children(':eq(' + index + ')'),
-                $img = $children.children('img'),
-                $figcaption = $children.children('figcaption');
+            var $children = $section.children(':eq(' + index + ')');
             if (item[curr]) {
-                $img.prop('src', item[curr].src);
-                $figcaption.text(item[curr].name);
-            } else {
-                $img.prop('src', '');
-                $figcaption.text('');
+                $children.children('img').prop('src', item[curr].src);
+                $children.children('figcaption').text(item[curr].name);
             }
         });
         curr++;
