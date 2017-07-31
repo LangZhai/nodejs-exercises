@@ -312,7 +312,11 @@ router.post('/auto', async (req, res) => {
         objKeys = Object.keys(obj);
         objKeys.forEach(key => {
             var item = obj[key];
-            item.offset.forEach((val, i) => item.offset[i] += obj.baseOffset[i % 2 === 0 ? 0 : 1]);
+            item.offset.forEach((val, i) => {
+                if (!item.isCenter) {
+                    item.offset[i] += obj.baseOffset[i % 2 === 0 ? 0 : 1];
+                }
+            });
             item.isCenter = isCenter || item.isCenter;
         });
         if (objKeys.length) {
