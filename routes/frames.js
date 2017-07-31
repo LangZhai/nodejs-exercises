@@ -275,7 +275,7 @@ router.post('/auto', async (req, res) => {
                 }
             });
         },
-        loop = (key) => {
+        loop = key => {
             return new Promise(async (resolve, reject) => {
                 var item = obj[key],
                     pathRoot = key.split(path.sep)[0],
