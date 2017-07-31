@@ -46,7 +46,6 @@ $(function () {
         });
         if (list[index].length) {
             if ($children.length) {
-                $children.replaceWith(template_figure.template(list[index][curr]));
                 $ul.children(':eq(' + index + ')').replaceWith(template_li.template(list[index][curr]));
             } else {
                 $section.append(template_figure.template(list[index][curr]));
