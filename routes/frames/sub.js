@@ -149,7 +149,6 @@ var fs = require('fs'),
                     await fs.writeFileAsync(path.join(outPath, dirOut, `${txtName}.txt`), txt.reduce((a, b) => {
                         return a.concat(b);
                     }, [direction, files.length]).join());
-                    process.send({content: `${dirIn} 生成完毕！`});
                     resolve();
                 } catch (err) {
                     reject(err);
@@ -177,6 +176,10 @@ var fs = require('fs'),
             }
             try {
                 await Promise.all(task);
+                process.send({
+                    percent: true,
+                    content: `${dirIn} 生成完毕！`
+                });
                 if (list.length) {
                     await loop(list.shift());
                 }
@@ -191,7 +194,7 @@ Promise.promisifyAll(fs);
 
 process.on('message', async msg => {
     rootPath = msg.rootPath;
-    outPath = msg.rootPath;
+    outPath = msg.outPath;
     isFull = msg.isFull;
     list = msg.list;
     if (list.length) {

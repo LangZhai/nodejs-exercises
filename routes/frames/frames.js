@@ -106,6 +106,7 @@ router.post('/auto', async (req, res) => {
         size,
         obj,
         objKeys,
+        percent = 0,
         rootPath = req.body.rootPath,
         outPath = req.body.outPath,
         isCenter = req.body.isCenter,
@@ -145,12 +146,14 @@ router.post('/auto', async (req, res) => {
             await Promise.all(new Array(cpus).join().split(',').map((item, i) => {
                 return new Promise((resolve, reject) => {
                     child_process.fork(path.join(__dirname, 'sub.js')).on('message', msg => {
-                        if (msg.content) {
+                        if (msg.err) {
+                            reject(msg.err);
+                        } else if (msg.percent) {
+                            writeln(`${msg.content} =====${Math.round(++percent / objKeys.length * 100)}%=====`);
+                        } else if (msg.content) {
                             writeln(msg.content);
                         } else if (msg.over) {
                             resolve();
-                        } else if (msg.err) {
-                            reject(msg.err);
                         }
                     }).send({
                         rootPath: rootPath,
