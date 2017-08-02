@@ -118,12 +118,15 @@ router.post('/auto', async (req, res) => {
                 days = Math.floor(diff / (24 * 3600 * 1000)),
                 hours,
                 minutes,
-                seconds;
+                seconds,
+                msg;
             hours = Math.floor(leave / (3600 * 1000));
             leave = leave % (3600 * 1000);
             minutes = Math.floor(leave / (60 * 1000));
             seconds = Math.round(leave % (60 * 1000) / 1000);
-            res.write(`[${days ? `${days}days ` : ''}${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}] ${content}\r\n`);
+            msg = `[${days ? `${days}days ` : ''}${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}] ${content}\r\n`;
+            res.write(msg);
+            console.log(msg);
         };
     writeln('SpriteFrames生成开始！');
     try {
@@ -149,7 +152,7 @@ router.post('/auto', async (req, res) => {
                         if (msg.err) {
                             reject(msg.err);
                         } else if (msg.percent) {
-                            writeln(`${msg.content} =====${Math.round(++percent / objKeys.length * 100)}%=====`);
+                            writeln(`${msg.content} =====${(++percent / objKeys.length * 100).toFixed(2)}%=====`);
                         } else if (msg.content) {
                             writeln(msg.content);
                         } else if (msg.over) {
