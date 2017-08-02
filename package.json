@@ -15,7 +15,6 @@
         "multiparty": "",
         "pngjs": "",
         "json-bufferify": "",
-        "bluebird": "",
-        "webworker-threads": ""
+        "bluebird": ""
     }
 }
