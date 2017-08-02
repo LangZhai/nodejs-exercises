@@ -33,7 +33,7 @@ app.use(express.static(app.get('resource')));
 require('express-ws')(app);
 app.use('/bilibili', require('../routes/bilibili'));
 app.use('/utils', require('../routes/utils'));
-app.use('/frames', require('../routes/frames'));
+app.use('/frames', require('../routes/frames/frames'));
 //app.use('/websocket', require('../routes/websocket'));
 
 // catch 404 and forward to error handler
