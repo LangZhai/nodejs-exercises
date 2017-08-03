@@ -147,7 +147,7 @@ router.post('/auto', async (req, res) => {
             try {
                 await Promise.all(new Array(cpus).join().split(',').map((item, i) => {
                     return new Promise((resolve, reject) => {
-                        var last,
+                        var part,
                             cp = child_process.fork(path.join(__dirname, 'sub.js')).on('message', async msg => {
                                 if (msg.err) {
                                     reject(msg.err);
@@ -159,28 +159,29 @@ router.post('/auto', async (req, res) => {
                                     if (busy) {
                                         cp.send({busy: busy});
                                     } else {
+                                        console.log(`process ${cp.pid} going to over.`);
                                         busy = true;
-                                        console.log(`process ${cp.pid} called over.`);
-                                        last = (await Promise.all(cps.filter(item => item !== cp).map(item => {
+                                        part = (await Promise.all(cps.filter(item => item !== cp).map(item => {
                                             return new Promise(resolve => {
-                                                var lastMessage = msg => {
-                                                    if (msg.last !== undefined) {
-                                                        item.removeListener('message', lastMessage);
-                                                        resolve(msg.last);
+                                                var partMessage = msg => {
+                                                    if (msg.part) {
+                                                        item.removeListener('message', partMessage);
+                                                        resolve(msg.part);
                                                     }
                                                 }
-                                                item.on('message', lastMessage);
-                                                item.send('last');
+                                                item.on('message', partMessage);
+                                                item.send({cps: cps.length});
                                             });
-                                        }))).filter(item => !!item);
-                                        console.log(`${cp.pid} last:${last.map(item => item.key)}`);
-                                        if (last.length) {
-                                            cp.send({last: last});
+                                        }))).reduce((a, b) => a.concat(b), []).filter(item => !!item);
+                                        if (part.length) {
+                                            cp.send({part: part});
+                                            console.log(`process ${cp.pid} get part:${part.map(item => item.key)}`);
                                         } else {
                                             cp.kill();
                                             cps.splice(cps.indexOf(cp), 1);
                                             busy = false;
                                             resolve();
+                                            console.log(`process ${cp.pid} over.`);
                                         }
                                     }
                                 } else if (msg.free) {

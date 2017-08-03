@@ -204,14 +204,14 @@ var fs = require('fs'),
 Promise.promisifyAll(fs);
 
 process.on('message', msg => {
-    if (msg === 'last') {
-        process.send({last: list.pop() || null});
-    } else if (msg.last) {
-        list = msg.last;
+    if (msg.cps) {
+        process.send({part: list.splice(-Math.round(list.length / msg.cps))});
+    } else if (msg.part) {
+        list = msg.part;
         process.send({free: true});
         exec();
     } else if (msg.busy) {
-        process.send({over: true});
+        setTimeout(() => process.send({over: true}), 1000);
     } else {
         rootPath = msg.rootPath;
         outPath = msg.outPath;
