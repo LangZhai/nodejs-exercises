@@ -188,22 +188,35 @@ var fs = require('fs'),
                 reject(err);
             }
         });
+    },
+    exec = async () => {
+        if (list.length) {
+            try {
+                await loop(list.shift());
+            } catch (err) {
+                process.send({err: {message: err.message}});
+                console.log(err);
+            }
+        }
+        process.send({over: true});
     };
 
 Promise.promisifyAll(fs);
 
-process.on('message', async msg => {
-    rootPath = msg.rootPath;
-    outPath = msg.outPath;
-    isFull = msg.isFull;
-    list = msg.list;
-    if (list.length) {
-        try {
-            await loop(list.shift());
-        } catch (err) {
-            process.send({err: {message: err.message}});
-        }
+process.on('message', msg => {
+    if (msg === 'last') {
+        process.send({last: list.pop() || null});
+    } else if (msg.last) {
+        list = msg.last;
+        process.send({free: true});
+        exec();
+    } else if (msg.busy) {
+        process.send({over: true});
+    } else {
+        rootPath = msg.rootPath;
+        outPath = msg.outPath;
+        isFull = msg.isFull;
+        list = msg.list;
+        exec();
     }
-    process.send({over: true});
-    process.kill(process.pid);
 });

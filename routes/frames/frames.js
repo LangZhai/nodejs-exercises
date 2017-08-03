@@ -3,7 +3,7 @@ var router = require('express').Router(),
     path = require('path'),
     Promise = require('bluebird'),
     child_process = require('child_process'),
-    cpus = require('os').cpus().length + 2,
+    cpus = require('os').cpus().length,
     forceWrite = res => {
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.write('‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌‌');
@@ -107,6 +107,8 @@ router.post('/auto', async (req, res) => {
         obj,
         objKeys,
         percent = 0,
+        cps = [],
+        busy = false,
         rootPath = req.body.rootPath,
         outPath = req.body.outPath,
         isCenter = req.body.isCenter,
@@ -116,17 +118,13 @@ router.post('/auto', async (req, res) => {
                 diff = current - (start ? start : (start = current)),
                 leave = diff % (24 * 3600 * 1000),
                 days = Math.floor(diff / (24 * 3600 * 1000)),
-                hours,
+                hours = Math.floor(leave / (3600 * 1000)),
                 minutes,
-                seconds,
-                msg;
-            hours = Math.floor(leave / (3600 * 1000));
+                seconds;
             leave = leave % (3600 * 1000);
             minutes = Math.floor(leave / (60 * 1000));
             seconds = Math.round(leave % (60 * 1000) / 1000);
-            msg = `[${days ? `${days}days ` : ''}${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}] ${content}\r\n`;
-            res.write(msg);
-            console.log(msg);
+            res.write(`[${days ? `${days}days ` : ''}${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes}:${seconds < 10 ? `0${seconds}` : seconds}] ${content}\r\n`);
         };
     writeln('SpriteFrames生成开始！');
     try {
@@ -146,31 +144,68 @@ router.post('/auto', async (req, res) => {
         });
         if (objKeys.length) {
             size = Math.round(objKeys.length / cpus);
-            await Promise.all(new Array(cpus).join().split(',').map((item, i) => {
-                return new Promise((resolve, reject) => {
-                    child_process.fork(path.join(__dirname, 'sub.js')).on('message', msg => {
-                        if (msg.err) {
-                            reject(msg.err);
-                        } else if (msg.percent) {
-                            writeln(`${msg.content} =====${(++percent / objKeys.length * 100).toFixed(2)}%=====`);
-                        } else if (msg.content) {
-                            writeln(msg.content);
-                        } else if (msg.over) {
-                            resolve();
-                        }
-                    }).send({
-                        rootPath: rootPath,
-                        outPath: outPath,
-                        isFull: isFull,
-                        list: objKeys.slice(i * size, i === cpus - 1 ? undefined : (i + 1) * size).map(key => {
-                            return {
-                                key: key,
-                                item: obj[key]
-                            };
-                        })
+            try {
+                await Promise.all(new Array(cpus).join().split(',').map((item, i) => {
+                    return new Promise((resolve, reject) => {
+                        var last,
+                            cp = child_process.fork(path.join(__dirname, 'sub.js')).on('message', async msg => {
+                                if (msg.err) {
+                                    reject(msg.err);
+                                } else if (msg.percent) {
+                                    writeln(`${msg.content} =====${(++percent / objKeys.length * 100).toFixed(2)}%=====`);
+                                } else if (msg.content) {
+                                    writeln(msg.content);
+                                } else if (msg.over) {
+                                    if (busy) {
+                                        cp.send({busy: busy});
+                                    } else {
+                                        busy = true;
+                                        console.log(`process ${cp.pid} called over.`);
+                                        last = (await Promise.all(cps.filter(item => item !== cp).map(item => {
+                                            return new Promise(resolve => {
+                                                var lastMessage = msg => {
+                                                    if (msg.last !== undefined) {
+                                                        item.removeListener('message', lastMessage);
+                                                        resolve(msg.last);
+                                                    }
+                                                }
+                                                item.on('message', lastMessage);
+                                                item.send('last');
+                                            });
+                                        }))).filter(item => !!item);
+                                        console.log(`${cp.pid} last:${last.map(item => item.key)}`);
+                                        if (last.length) {
+                                            cp.send({last: last});
+                                        } else {
+                                            cp.kill();
+                                            cps.splice(cps.indexOf(cp), 1);
+                                            busy = false;
+                                            resolve();
+                                        }
+                                    }
+                                } else if (msg.free) {
+                                    busy = false;
+                                }
+                            });
+                        cp.send({
+                            rootPath: rootPath,
+                            outPath: outPath,
+                            isFull: isFull,
+                            list: objKeys.slice(i * size, i === cpus - 1 ? undefined : (i + 1) * size).map(key => {
+                                return {
+                                    key: key,
+                                    item: obj[key]
+                                };
+                            })
+                        });
+                        cps.push(cp);
                     });
-                });
-            }));
+                }));
+            } catch (err) {
+                cps.forEach(item => item.kill());
+                cps.splice(0);
+                writeln(err.message);
+            }
         }
     } catch (err) {
         writeln(err.message);
