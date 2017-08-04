@@ -85,6 +85,11 @@ var fs = require('fs'),
                                             });
                                         });
                                     }));
+                                    txt[index] = txt[index].reduce((a, b) => {
+                                        return a.concat(b);
+                                    });
+                                    process.send({content: `${dirPath} 演算完毕！`});
+                                    await mkdirs(path.join(outPath, dirOut), null);
                                     if (isFull) {
                                         datas.forEach(sub => {
                                             if (prop.width[row] + sub.width > 4000) {
@@ -124,13 +129,6 @@ var fs = require('fs'),
                                             })
                                         });
                                         pic.data = Buffer.from(result);
-                                    }
-                                    txt[index] = txt[index].reduce((a, b) => {
-                                        return a.concat(b);
-                                    });
-                                    process.send({content: `${dirPath} 演算完毕！`});
-                                    await mkdirs(path.join(outPath, dirOut), null);
-                                    if (isFull) {
                                         pic.pack().pipe(fs.createWriteStream(path.join(outPath, dirOut, `${picName[item]}.png`)).on('close', () => {
                                             process.send({content: `${dirPath} 转换完毕！`});
                                             resolve();
@@ -194,8 +192,8 @@ var fs = require('fs'),
             try {
                 await loop(list.shift());
             } catch (err) {
-                process.send({err: {message: err.message}});
                 console.log(err);
+                process.send({err: {message: err.message}});
             }
         }
         process.send({over: true});

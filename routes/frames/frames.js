@@ -159,7 +159,6 @@ router.post('/auto', async (req, res) => {
                                     if (busy) {
                                         cp.send({busy: busy});
                                     } else {
-                                        console.log(`process ${cp.pid} going to over.`);
                                         busy = true;
                                         part = (await Promise.all(cps.filter(item => item !== cp).map(item => {
                                             return new Promise(resolve => {
@@ -175,13 +174,11 @@ router.post('/auto', async (req, res) => {
                                         }))).reduce((a, b) => a.concat(b), []).filter(item => !!item);
                                         if (part.length) {
                                             cp.send({part: part});
-                                            console.log(`process ${cp.pid} get part:${part.map(item => item.key)}`);
                                         } else {
                                             cp.kill();
                                             cps.splice(cps.indexOf(cp), 1);
                                             busy = false;
                                             resolve();
-                                            console.log(`process ${cp.pid} over.`);
                                         }
                                     }
                                 } else if (msg.free) {
